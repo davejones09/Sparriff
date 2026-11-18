@@ -36,23 +36,21 @@ Pro Tag zählen höchstens 5 Spar-Momente. Level: Sandbank (0) · Seegraswiese (
 
 Tiere: Clownfisch (erster Spar-Moment), Seepferdchen (erster gesicherter), Meeresschildkröte (erster gesicherter Hunderter).
 
-## Bilder einbauen
+## Bilder
 
-Bis die GPT-Bilder da sind, zeichnet die App Platzhalter. So kommen die echten Bilder rein:
+Alle Bilder kommen aus GPT, freigestellt und zugeschnitten. Eingebunden werden sie in `src/lib/images.ts`.
 
-1. Bild in den passenden Ordner legen:
+| Ordner | Inhalt | Status |
+| --- | --- | --- |
+| `assets/riff/` | Riff Stufe 1–5 (Sandbank … Barriereriff), 941 × 1672 | in der App |
+| `assets/tiere/` | Clownfisch, Seepferdchen, Meeresschildkröte | im Riff |
+| `assets/tiere/` | Hammerhai, Mantarochen, Orca, Weißer Hai, Indischer Grindwal, Pottwal | Sammlung, noch gesperrt (Challenges, Phase 2) |
+| `assets/icons/` | Muschel, Schatztruhe zu/offen | in der App |
+| `assets/icons/perle.png` | Perle (Streak-Schutz) | vorbereitet, Phase 2 |
+| `assets/themes/` | Tiefsee, Nachtriff, Polarmeer | vorbereitet, Phase 3 |
+| `assets/icon.png`, `android-icon-*` | App-Icon (Kaurimuschel) | in der App |
 
-   | Bild | Datei |
-   | --- | --- |
-   | Riff Stufe 1–5 (Hochformat 9:16) | `assets/riff/stufe-1.png` … `stufe-5.png` |
-   | Clownfisch, Seepferdchen, Meeresschildkröte (freigestellt, Blick nach rechts) | `assets/tiere/clownfisch.png`, `seepferdchen.png`, `meeresschildkroete.png` |
-   | Muschel-Icon (freigestellt) | `assets/icons/muschel.png` |
-   | App-Icon (1024 × 1024) | `assets/icon.png` ersetzen |
-
-2. In `src/lib/images.ts` das passende `null` ersetzen, z. B.:
-   ```ts
-   require('../../assets/riff/stufe-1.png'),
-   ```
+Neue Tiere: freigestellt als PNG, Blick nach rechts, in `assets/tiere/` legen und mit Seitenverhältnis in `src/lib/images.ts` eintragen.
 
 ## Entwicklung
 
@@ -67,3 +65,4 @@ npm run lint        # Lint
 - `src/lib/store.ts` – Speicher (SQLite auf dem Gerät)
 - `src/lib/reminders.ts` – Zahltag-Erinnerung
 - `src/components/` – Riff-Szene, Belohnungs-Hinweis, UI-Bausteine
+- `src/lib/images.ts` – alle Bilder an einer Stelle

@@ -108,6 +108,24 @@ export const ANIMALS: readonly Animal[] = [
   { id: 'schildkroete', name: 'Meeresschildkröte', hint: 'Dein erster gesicherter Hunderter' },
 ];
 
+/** Große Sammel-Tiere – kommen mit den Challenges (Phase 2), bis dahin gesperrt. */
+export type CollectibleId = 'hammerhai' | 'mantarochen' | 'orca' | 'weisser-hai' | 'grindwal' | 'pottwal';
+
+export interface Collectible {
+  id: CollectibleId;
+  name: string;
+  hint: string;
+}
+
+export const COLLECTIBLES: readonly Collectible[] = [
+  { id: 'hammerhai', name: 'Hammerhai', hint: 'Kommt mit den Challenges' },
+  { id: 'mantarochen', name: 'Mantarochen', hint: 'Kommt mit den Challenges' },
+  { id: 'orca', name: 'Orca', hint: 'Kommt mit den Challenges' },
+  { id: 'weisser-hai', name: 'Weißer Hai', hint: 'Kommt mit den Challenges' },
+  { id: 'grindwal', name: 'Indischer Grindwal', hint: 'Kommt mit den Challenges' },
+  { id: 'pottwal', name: 'Pottwal', hint: 'Krönt die 52-Wochen-Challenge' },
+];
+
 export function unlockedAnimals(state: SparState): AnimalId[] {
   const ids: AnimalId[] = [];
   if (state.moments.length > 0) ids.push('clownfisch');

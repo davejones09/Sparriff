@@ -1,6 +1,7 @@
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Card, Label } from '@/components/ui';
-import { ANIMALS, formatEuro, totals, unlockedAnimals, type SparMoment } from '@/lib/logic';
+import { Card, Label, SpriteImage } from '@/components/ui';
+import { animalImages, collectibleImages, type Sprite } from '@/lib/images';
+import { ANIMALS, COLLECTIBLES, formatEuro, totals, unlockedAnimals, type SparMoment } from '@/lib/logic';
 import { useSpar } from '@/lib/store';
 import { colors, radius } from '@/lib/theme';
 
@@ -24,17 +25,24 @@ export default function UebersichtScreen() {
       </Card>
 
       <Text style={styles.h2}>Deine Riff-Bewohner</Text>
-      <Card>
-        {ANIMALS.map((a) => {
-          const has = unlocked.includes(a.id);
-          return (
-            <View key={a.id} style={[styles.between, !has && { opacity: 0.45 }]}>
-              <Text style={styles.text}>{has ? a.name : '???'}</Text>
-              <Label>{a.hint}</Label>
-            </View>
-          );
-        })}
-      </Card>
+      <View style={styles.grid}>
+        {ANIMALS.map((a) => (
+          <AnimalTile
+            key={a.id}
+            name={a.name}
+            hint={a.hint}
+            sprite={animalImages[a.id]}
+            locked={!unlocked.includes(a.id)}
+          />
+        ))}
+      </View>
+
+      <Text style={styles.h2}>Sammel-Tiere</Text>
+      <View style={styles.grid}>
+        {COLLECTIBLES.map((c) => (
+          <AnimalTile key={c.id} name={c.name} hint={c.hint} sprite={collectibleImages[c.id]} locked />
+        ))}
+      </View>
 
       <Text style={styles.h2}>Spar-Momente</Text>
       {s.moments.length === 0 && <Label>Noch nichts eingetragen.</Label>}
@@ -42,6 +50,18 @@ export default function UebersichtScreen() {
         <MomentRow key={m.id} m={m} onSecure={() => s.secure([m.id])} onDelete={() => s.deleteMoment(m.id)} />
       ))}
     </ScrollView>
+  );
+}
+
+function AnimalTile({ name, hint, sprite, locked }: { name: string; hint: string; sprite: Sprite; locked: boolean }) {
+  return (
+    <View style={styles.tile}>
+      <View style={styles.tileImage}>
+        <SpriteImage sprite={sprite} height={Math.min(64, 120 / sprite.aspect)} locked={locked} />
+      </View>
+      <Text style={[styles.text, locked && { color: colors.textDim }]}>{name}</Text>
+      <Label>{hint}</Label>
+    </View>
   );
 }
 
@@ -93,11 +113,21 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 4,
   },
+  tile: {
+    flexBasis: '47%',
+    flexGrow: 1,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius,
+    padding: 12,
+    gap: 4,
+  },
+  tileImage: { height: 72, alignItems: 'center', justifyContent: 'center' },
   statValue: { color: colors.text, fontSize: 19, fontWeight: '700' },
   big: { color: colors.sand, fontSize: 26, fontWeight: '700' },
   h2: { color: colors.text, fontSize: 17, fontWeight: '600', marginTop: 8 },
   text: { color: colors.text, fontSize: 15 },
-  between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
