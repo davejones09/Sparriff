@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Button, Card, Label, ProgressBar } from '@/components/ui';
+import { Button, Card, Label, ProgressBar, SpriteImage } from '@/components/ui';
+import { treasureImages } from '@/lib/images';
 import {
   dayKey,
   formatEuro,
@@ -62,18 +63,21 @@ export default function ZielScreen() {
         </Label>
       </Card>
 
-      <Card style={p.reached && { borderColor: colors.sand }}>
-        <Text style={styles.h2}>Schatztruhe</Text>
-        {p.reached ? (
-          <Text style={styles.text}>
-            Die Truhe ist offen: {formatEuro(p.treasureCents)} gehören dir – ohne schlechtes Gewissen.
-          </Text>
-        ) : (
-          <Text style={styles.text}>
-            {formatEuro(p.treasureCents)} liegen drin ({goal.treasurePercent} % vom Gesparten). Sie öffnet sich, wenn
-            du dein Ziel erreichst.
-          </Text>
-        )}
+      <Card style={[styles.treasure, p.reached && { borderColor: colors.sand }]}>
+        <SpriteImage sprite={p.reached ? treasureImages.open : treasureImages.closed} height={76} />
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={styles.h2}>Schatztruhe</Text>
+          {p.reached ? (
+            <Text style={styles.text}>
+              Die Truhe ist offen: {formatEuro(p.treasureCents)} gehören dir – ohne schlechtes Gewissen.
+            </Text>
+          ) : (
+            <Text style={styles.text}>
+              {formatEuro(p.treasureCents)} liegen drin ({goal.treasurePercent} % vom Gesparten). Sie öffnet sich,
+              wenn du dein Ziel erreichst.
+            </Text>
+          )}
+        </View>
       </Card>
 
       <Button title="Ziel bearbeiten" variant="secondary" onPress={() => setMode('edit')} />
@@ -188,6 +192,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  treasure: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   pill: {
     paddingHorizontal: 14,
     paddingVertical: 8,

@@ -15,7 +15,7 @@
     "android": {
       "package": "com.davejones09.sparriff",
       "adaptiveIcon": {
-        "backgroundColor": "#06263A",
+        "backgroundColor": "#0E6E86",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
