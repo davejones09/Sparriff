@@ -1,0 +1,41 @@
+# Baut bei jedem Push auf main die Web-Version und legt sie in den Branch gh-pages.
+# GitHub Pages zeigt sie dann unter https://davejones09.github.io/Sparriff/
+# (Einmalig: Settings → Pages → Source „Deploy from a branch“ → gh-pages / root)
+name: Web-Vorschau
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-vorschau
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx expo export --platform web
+      - name: In gh-pages veröffentlichen
+        run: |
+          cd dist
+          # Direktaufrufe wie /Sparriff/ziel landen sonst auf einer 404-Seite
+          cp index.html 404.html
+          # Expo-Dateien beginnen mit _, Jekyll würde sie sonst ignorieren
+          touch .nojekyll
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Web-Vorschau ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages

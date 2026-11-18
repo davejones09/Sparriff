@@ -4,6 +4,12 @@ Spar-App mit Belohnungssystem: Jeder gesparte Euro lässt dein eigenes Korallenr
 
 Gebaut mit Expo (React Native, TypeScript). Läuft komplett offline, alle Daten bleiben auf dem Handy.
 
+## Im Browser ansehen
+
+**https://davejones09.github.io/Sparriff/** – läuft im Handy-Browser, ohne Installation.
+
+Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite neu. Die Daten bleiben im Browser gespeichert. Die Zahltag-Erinnerung gibt’s im Browser nicht.
+
 ## Ausprobieren
 
 1. [Node.js](https://nodejs.org) installieren (LTS).

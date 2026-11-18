@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Card, Label, ProgressBar, SpriteImage } from '@/components/ui';
 import { treasureImages } from '@/lib/images';
 import {
@@ -11,6 +11,7 @@ import {
   parseGermanDate,
   type GoalInput,
 } from '@/lib/logic';
+import { confirm } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
 import { colors, radius } from '@/lib/theme';
 
@@ -87,10 +88,13 @@ export default function ZielScreen() {
         onPress={() =>
           p.reached
             ? setMode('new')
-            : Alert.alert('Neues Ziel starten?', 'Der Fortschritt für das aktuelle Ziel beginnt dann wieder bei 0.', [
-                { text: 'Abbrechen', style: 'cancel' },
-                { text: 'Neu starten', style: 'destructive', onPress: () => setMode('new') },
-              ])
+            : confirm({
+                title: 'Neues Ziel starten?',
+                message: 'Der Fortschritt für das aktuelle Ziel beginnt dann wieder bei 0.',
+                confirmText: 'Neu starten',
+                destructive: true,
+                onConfirm: () => setMode('new'),
+              })
         }
       />
     </ScrollView>

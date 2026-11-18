@@ -23,7 +23,12 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro",
+      "name": "Sparriff",
+      "themeColor": "#06263A",
+      "backgroundColor": "#06263A"
     },
     "plugins": [
       "expo-router",
@@ -31,7 +36,8 @@
       "expo-notifications"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/Sparriff"
     }
   }
 }

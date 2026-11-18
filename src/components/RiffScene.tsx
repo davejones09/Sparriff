@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Animated, Easing, Image, StyleSheet, View, useAnimatedValue } from 'react-native';
+import { Animated, Easing, Image, StyleSheet, View } from 'react-native';
 import { RIFF_ASPECT, animalImages, riffImages } from '@/lib/images';
 import type { AnimalId } from '@/lib/logic';
 import { colors, radius } from '@/lib/theme';
+import { useAnimatedNumber } from '@/lib/useAnimatedNumber';
 
 /** Das Riff auf dem Startbildschirm – zeigt den unteren Teil des Hochformat-Bilds. */
 export function RiffScene({
@@ -67,7 +68,7 @@ function Swimmer({
   size: number;
   children: ReactNode;
 }) {
-  const t = useAnimatedValue(0);
+  const t = useAnimatedNumber(0);
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
@@ -88,7 +89,7 @@ function Swimmer({
 }
 
 function Bobber({ x, y, children }: { x: number; y: number; children: ReactNode }) {
-  const t = useAnimatedValue(0);
+  const t = useAnimatedNumber(0);
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([

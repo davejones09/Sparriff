@@ -1,5 +1,4 @@
-import * as Notifications from 'expo-notifications';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button, Card, Label } from '@/components/ui';
 import {
   DAILY_REWARD_LIMIT,
@@ -10,7 +9,8 @@ import {
   WEEKLY_SHELLS,
   type Settings,
 } from '@/lib/logic';
-import { scheduleZahltag } from '@/lib/reminders';
+import { confirm, notify } from '@/lib/platform/dialog';
+import { cancelReminders, remindersSupported, scheduleZahltag } from '@/lib/reminders';
 import { useSpar } from '@/lib/store';
 import { colors } from '@/lib/theme';
 
@@ -25,7 +25,7 @@ export default function EinstellungenScreen() {
     const ok = await scheduleZahltag(next);
     if (!ok) {
       updateSettings({ remindersEnabled: false });
-      Alert.alert('Keine Mitteilungen erlaubt', 'Erlaube Mitteilungen für Sparriff in den Einstellungen deines Handys.');
+      notify('Keine Mitteilungen erlaubt', 'Erlaube Mitteilungen für Sparriff in den Einstellungen deines Handys.');
     }
   };
 
@@ -35,17 +35,16 @@ export default function EinstellungenScreen() {
   };
 
   const confirmReset = () =>
-    Alert.alert('Alles löschen?', 'Ziel, Spar-Momente und Muscheln werden gelöscht.', [
-      { text: 'Abbrechen', style: 'cancel' },
-      {
-        text: 'Löschen',
-        style: 'destructive',
-        onPress: () => {
-          resetAll();
-          Notifications.cancelAllScheduledNotificationsAsync();
-        },
+    confirm({
+      title: 'Alles löschen?',
+      message: 'Ziel, Spar-Momente und Muscheln werden gelöscht.',
+      confirmText: 'Löschen',
+      destructive: true,
+      onConfirm: () => {
+        resetAll();
+        cancelReminders();
       },
-    ]);
+    });
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -59,12 +58,17 @@ export default function EinstellungenScreen() {
         <View style={styles.between}>
           <Text style={styles.text}>Erinnerung um {settings.reminderHour} Uhr</Text>
           <Switch
-            value={settings.remindersEnabled}
+            disabled={!remindersSupported}
+            value={settings.remindersEnabled && remindersSupported}
             onValueChange={(v) => apply({ remindersEnabled: v })}
             trackColor={{ true: colors.teal, false: colors.surfaceStrong }}
           />
         </View>
-        <Label>Am Zahltag erinnert dich die App, deine gemerkten Beträge aufs Sparkonto zu schieben.</Label>
+        <Label>
+          {remindersSupported
+            ? 'Am Zahltag erinnert dich die App, deine gemerkten Beträge aufs Sparkonto zu schieben.'
+            : 'Die Zahltag-Erinnerung gibt’s nur in der App, nicht im Browser. Der Zahltag-Hinweis im Riff funktioniert trotzdem.'}
+        </Label>
       </Card>
 
       <Card>

@@ -1,6 +1,5 @@
-import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RewardToast } from '@/components/RewardToast';
 import { RiffScene } from '@/components/RiffScene';
@@ -14,6 +13,7 @@ import {
   totals,
   unlockedAnimals,
 } from '@/lib/logic';
+import { confirm, success } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
 import { colors } from '@/lib/theme';
 
@@ -28,20 +28,16 @@ export default function RiffScreen() {
   const payday = isPayday(s.settings, now);
 
   const secureAll = () =>
-    Alert.alert(
-      'Geld gesichert?',
-      `Hast du ${formatEuro(t.openCents)} aufs Sparkonto überwiesen?`,
-      [
-        { text: 'Noch nicht', style: 'cancel' },
-        {
-          text: 'Ja, überwiesen',
-          onPress: () => {
-            s.secure(open.map((m) => m.id));
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          },
-        },
-      ],
-    );
+    confirm({
+      title: 'Geld gesichert?',
+      message: `Hast du ${formatEuro(t.openCents)} aufs Sparkonto überwiesen?`,
+      confirmText: 'Ja, überwiesen',
+      cancelText: 'Noch nicht',
+      onConfirm: () => {
+        s.secure(open.map((m) => m.id));
+        success();
+      },
+    });
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>

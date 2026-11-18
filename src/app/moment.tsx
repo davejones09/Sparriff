@@ -1,9 +1,9 @@
-import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Label } from '@/components/ui';
 import { DAILY_REWARD_LIMIT, dayKey, formatEuro, parseEuro, type MomentKind } from '@/lib/logic';
+import { success } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
 import { colors, radius } from '@/lib/theme';
 
@@ -35,7 +35,7 @@ export default function MomentScreen() {
       return;
     }
     addMoment({ kind, label, amountCents: cents });
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    success();
     router.back();
   };
 
