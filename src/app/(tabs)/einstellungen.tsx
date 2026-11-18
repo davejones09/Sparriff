@@ -1,0 +1,118 @@
+import * as Notifications from 'expo-notifications';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Button, Card, Label } from '@/components/ui';
+import {
+  DAILY_REWARD_LIMIT,
+  GOAL_SHELLS,
+  LEVELS,
+  MOMENT_SHELLS,
+  SECURED_SHELLS,
+  WEEKLY_SHELLS,
+  type Settings,
+} from '@/lib/logic';
+import { scheduleZahltag } from '@/lib/reminders';
+import { useSpar } from '@/lib/store';
+import { colors } from '@/lib/theme';
+
+export default function EinstellungenScreen() {
+  const settings = useSpar((s) => s.settings);
+  const updateSettings = useSpar((s) => s.updateSettings);
+  const resetAll = useSpar((s) => s.resetAll);
+
+  const apply = async (patch: Partial<Settings>) => {
+    const next = { ...settings, ...patch };
+    updateSettings(patch);
+    const ok = await scheduleZahltag(next);
+    if (!ok) {
+      updateSettings({ remindersEnabled: false });
+      Alert.alert('Keine Mitteilungen erlaubt', 'Erlaube Mitteilungen für Sparriff in den Einstellungen deines Handys.');
+    }
+  };
+
+  const changeDay = (delta: number) => {
+    const day = Math.min(28, Math.max(1, settings.paydayDay + delta));
+    if (day !== settings.paydayDay) apply({ paydayDay: day });
+  };
+
+  const confirmReset = () =>
+    Alert.alert('Alles löschen?', 'Ziel, Spar-Momente und Muscheln werden gelöscht.', [
+      { text: 'Abbrechen', style: 'cancel' },
+      {
+        text: 'Löschen',
+        style: 'destructive',
+        onPress: () => {
+          resetAll();
+          Notifications.cancelAllScheduledNotificationsAsync();
+        },
+      },
+    ]);
+
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Card>
+        <Text style={styles.h2}>Zahltag</Text>
+        <View style={styles.between}>
+          <Stepper label="−" onPress={() => changeDay(-1)} />
+          <Text style={styles.big}>{settings.paydayDay}. des Monats</Text>
+          <Stepper label="+" onPress={() => changeDay(1)} />
+        </View>
+        <View style={styles.between}>
+          <Text style={styles.text}>Erinnerung um {settings.reminderHour} Uhr</Text>
+          <Switch
+            value={settings.remindersEnabled}
+            onValueChange={(v) => apply({ remindersEnabled: v })}
+            trackColor={{ true: colors.teal, false: colors.surfaceStrong }}
+          />
+        </View>
+        <Label>Am Zahltag erinnert dich die App, deine gemerkten Beträge aufs Sparkonto zu schieben.</Label>
+      </Card>
+
+      <Card>
+        <Text style={styles.h2}>So gibt’s Muscheln</Text>
+        <Rule text="Spar-Moment eintragen" shells={MOMENT_SHELLS} />
+        <Rule text="Spar-Moment gesichert" shells={SECURED_SHELLS} />
+        <Rule text="Wochenrate geschafft" shells={WEEKLY_SHELLS} />
+        <Rule text="Sparziel erreicht" shells={GOAL_SHELLS} />
+        <Label>Pro Tag zählen höchstens {DAILY_REWARD_LIMIT} Spar-Momente.</Label>
+        <Label>Level: {LEVELS.map((l) => `${l.name} (${l.min})`).join(' · ')}</Label>
+      </Card>
+
+      <Button title="Alle Daten löschen" variant="danger" onPress={confirmReset} />
+    </ScrollView>
+  );
+}
+
+function Stepper({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.stepper} accessibilityRole="button">
+      <Text style={styles.stepperText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function Rule({ text, shells }: { text: string; shells: number }) {
+  return (
+    <View style={styles.between}>
+      <Text style={styles.text}>{text}</Text>
+      <Text style={styles.shells}>+{shells}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  content: { padding: 16, gap: 12, paddingBottom: 40 },
+  h2: { color: colors.text, fontSize: 17, fontWeight: '600' },
+  big: { color: colors.text, fontSize: 20, fontWeight: '700' },
+  text: { color: colors.text, fontSize: 15 },
+  shells: { color: colors.sand, fontSize: 15, fontWeight: '700' },
+  between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
+  stepper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceStrong,
+  },
+  stepperText: { color: colors.text, fontSize: 22, fontWeight: '600' },
+});
