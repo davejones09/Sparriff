@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { Animated, StyleSheet, Text, View, useAnimatedValue } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSpar } from '@/lib/store';
+import { useAnimatedNumber } from '@/lib/useAnimatedNumber';
 import { colors, radius } from '@/lib/theme';
 import { ShellIcon } from './ui';
 
@@ -8,7 +9,7 @@ import { ShellIcon } from './ui';
 export function RewardToast() {
   const gain = useSpar((s) => s.lastGain);
   const clearGain = useSpar((s) => s.clearGain);
-  const opacity = useAnimatedValue(0);
+  const opacity = useAnimatedNumber(0);
 
   useEffect(() => {
     if (!gain) return;

@@ -4,6 +4,8 @@ import type { Settings } from './logic';
 
 const CHANNEL = 'zahltag';
 
+export const remindersSupported = true;
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -12,6 +14,10 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
+
+export async function cancelReminders(): Promise<void> {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}
 
 /**
  * Plant die monatliche Zahltag-Erinnerung neu.

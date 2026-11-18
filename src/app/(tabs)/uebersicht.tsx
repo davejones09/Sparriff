@@ -1,7 +1,8 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card, Label, SpriteImage } from '@/components/ui';
 import { animalImages, collectibleImages, type Sprite } from '@/lib/images';
 import { ANIMALS, COLLECTIBLES, formatEuro, totals, unlockedAnimals, type SparMoment } from '@/lib/logic';
+import { confirm } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
 import { colors, radius } from '@/lib/theme';
 
@@ -77,10 +78,13 @@ function Stat({ label, value }: { label: string; value: string }) {
 function MomentRow({ m, onSecure, onDelete }: { m: SparMoment; onSecure: () => void; onDelete: () => void }) {
   const date = new Date(m.createdAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
   const confirmDelete = () =>
-    Alert.alert('Spar-Moment löschen?', `${m.label} · ${formatEuro(m.amountCents)}`, [
-      { text: 'Abbrechen', style: 'cancel' },
-      { text: 'Löschen', style: 'destructive', onPress: onDelete },
-    ]);
+    confirm({
+      title: 'Spar-Moment löschen?',
+      message: `${m.label} · ${formatEuro(m.amountCents)}`,
+      confirmText: 'Löschen',
+      destructive: true,
+      onConfirm: onDelete,
+    });
 
   return (
     <Pressable onLongPress={confirmDelete} style={styles.row}>
