@@ -23,9 +23,11 @@ Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite ne
 ## Was drin ist
 
 - **Riff (Start)** – dein Riff in 5 Ausbaustufen, Muschel-Stand, Level-Fortschritt; bis zu 8 Tiere schwimmen darin herum
-- **Spar-Moment** – „Nicht gekauft“ (wird gemerkt) oder „Zur Seite gelegt“ (sofort gesichert), mit Vorlagen
+- **Spar-Moment** – „Nicht gekauft“ (wird gemerkt), „Zur Seite gelegt“ (sofort gesichert) oder „Extra-Geld“ (Weihnachtsgeld, Zulage … – auch auf mehrere Ziele verteilbar)
 - **Gemerkt vs. gesichert** – erst wenn du das Geld wirklich zur Seite legst (Tagesgeld, Unterkonto, ETF, Spardose …), gibt’s die vollen Muscheln
 - **Mehrere Ziele** – eins ist Hauptziel; beim Sichern wählst du, in welches Ziel das Geld geht
+- **Mitwachsende Wochenrate** – was zu Wochenbeginn noch fehlt, verteilt auf die restlichen Wochen; dazu eine Prognose („In deinem Tempo: 12.03.2027 – 2 Monate früher“). Extra-Geld zählt zum Stand, aber nicht zum Tempo
+- **Abzeichen „Frühstarter“** – Ziel mindestens 2 Wochen vor dem Termin erreicht (Ziel lief mindestens 2 Wochen); ohne extra Belohnung
 - **Truhen** – Wochenrate eines Ziels geschafft: kleine Truhe; Ziel erreicht: große Truhe mit einem seltenen Tier. Doppelte Tiere werden zu Muscheln
 - **Sammlung** – 25 Tiere in 4 Seltenheiten, unentdeckte als Silhouette
 - **Übersicht** – Woche, Monat, offen, gesichert, Hochrechnung aufs Jahr, alle Spar-Momente
@@ -38,6 +40,7 @@ Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite ne
 | --- | --- |
 | Spar-Moment eintragen | +10 |
 | Spar-Moment gesichert | +25 |
+| Extra-Geld (egal wie viel, auch aufgeteilt) | +10 +25, einmal |
 | Wochenrate eines Ziels geschafft | +50 und kleine Truhe |
 | Sparziel erreicht | +500 und große Truhe |
 | Doppeltes Tier aus einer Truhe | +30 / +80 / +200 je nach Seltenheit |

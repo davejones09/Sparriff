@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   ANIMALS,
+  addExtra,
   addGoal,
+  goalForecast,
+  initialWeeklyRateCents,
   addMoment,
   closedChests,
   deleteGoal,
@@ -125,7 +128,7 @@ describe('Mehrere Ziele', () => {
 
   it('rechnet die Wochenrate je Ziel aus', () => {
     const s = addGoal(initialState, urlaub, now, 'g1');
-    expect(weeklyRateCents(s.goals[0])).toBe(125_00);
+    expect(weeklyRateCents(s, s.goals[0], now)).toBe(125_00);
   });
 });
 
@@ -195,6 +198,58 @@ describe('Wochenrate, Ziel und Truhen', () => {
   it('nimmt Truhen-Tiere ins Riff auf', () => {
     const s: SparState = { ...initialState, collection: ['orca'] };
     expect(unlockedAnimals(s)).toEqual(['orca']);
+  });
+});
+
+describe('Extra-Geld, Wochenrate und Prognose', () => {
+  it('verteilt Extra-Geld auf mehrere Ziele und gibt Muscheln nur einmal', () => {
+    let s = addGoal(initialState, urlaub, now, 'g1');
+    s = addGoal(s, kamera, now, 'g2');
+    const r = addExtra(s, { label: 'Weihnachtsgeld', parts: [{ goalId: 'g1', amountCents: 300_00 }, { goalId: 'g2', amountCents: 50_00 }] }, at(0, 1), 'x');
+    expect(goalProgress(r.state, 'g1', now)!.securedCents).toBe(300_00);
+    expect(goalProgress(r.state, 'g2', now)!.securedCents).toBe(50_00);
+    expect(r.state.moments.filter((m) => m.kind === 'extra')).toHaveLength(2);
+    // +10 +25 einmal, plus Wochenrate für beide Ziele
+    expect(r.gain.rewards.filter((x) => x.type === 'moment' || x.type === 'gesichert')).toHaveLength(2);
+    expect(r.gain.newChests).toHaveLength(2);
+  });
+
+  it('senkt die Wochenrate ab der nächsten Woche', () => {
+    let s = addGoal(initialState, urlaub, now, 'g1');
+    s = addExtra(s, { label: 'Weihnachtsgeld', parts: [{ goalId: null, amountCents: 300_00 }] }, at(0, 1), 'x').state;
+    const g = s.goals[0];
+    expect(weeklyRateCents(s, g, at(0, 2))).toBe(125_00); // diese Woche stabil
+    expect(weeklyRateCents(s, g, at(5))).toBe(87_50); // 700 € auf 8 Wochen
+    expect(initialWeeklyRateCents(g)).toBe(125_00);
+    expect(goalProgress(s, 'g1', at(5))!.initialWeeklyRateCents).toBe(125_00);
+  });
+
+  it('gibt nach erreichtem Ziel keine Wochenraten-Truhen mehr', () => {
+    let s = addGoal(initialState, kamera, now, 'g2');
+    s = zurSeite(s, 200_00, at(0, 1)).state;
+    const r = zurSeite(s, 10_00, at(7));
+    expect(r.gain.newChests).toHaveLength(0);
+  });
+
+  it('prognostiziert aus dem regulären Tempo – Extra-Geld zählt zum Stand, nicht zum Tempo', () => {
+    let s = addGoal(initialState, urlaub, now, 'g1');
+    s = zurSeite(s, 125_00, at(0, 1)).state;
+    const ohne = goalForecast(s, 'g1', at(0, 2))!;
+    expect(ohne.daysEarly).toBe(7);
+    s = addExtra(s, { label: 'Zulage', parts: [{ goalId: null, amountCents: 300_00 }] }, at(0, 2), 'x').state;
+    const mit = goalForecast(s, 'g1', at(0, 3))!;
+    expect(mit.daysEarly).toBeGreaterThan(ohne.daysEarly);
+    expect(goalForecast(initialState, 'g1', now)).toBeNull();
+  });
+
+  it('vergibt Frühstarter nur bei mindestens 2 Wochen Vorsprung und Laufzeit', () => {
+    const base = addGoal(initialState, kamera, now, 'g2');
+    const spaet = zurSeite(base, 200_00, at(20));
+    expect(spaet.state.goals[0].early).toBe(true);
+    expect(spaet.gain.newBadges.map((g) => g.id)).toEqual(['g2']);
+    const zuFrueh = zurSeite(base, 200_00, at(3));
+    expect(zuFrueh.state.goals[0].early).toBe(false);
+    expect(zuFrueh.gain.newBadges).toHaveLength(0);
   });
 });
 

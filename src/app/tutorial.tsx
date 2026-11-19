@@ -42,7 +42,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Spar-Moment eintragen',
-    text: `Coffee to go gespart? Tipp auf „Spar-Moment eintragen“ und wähl „Nicht gekauft“. Geld direkt zur Seite gelegt? Dann „Zur Seite gelegt“. Jeder Spar-Moment bringt +${MOMENT_SHELLS} Muscheln.`,
+    text: `Coffee to go gespart? Tipp auf „Spar-Moment eintragen“ und wähl „Nicht gekauft“. Geld direkt zur Seite gelegt? Dann „Zur Seite gelegt“. Weihnachtsgeld oder Zulage? „Extra-Geld“. Jeder Spar-Moment bringt +${MOMENT_SHELLS} Muscheln.`,
     visual: animalImages.clownfisch,
   },
   {

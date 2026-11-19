@@ -6,6 +6,7 @@ import {
   dayKey,
   formatEuro,
   formatGermanDate,
+  goalForecast,
   goalProgress,
   parseEuro,
   parseGermanDate,
@@ -50,13 +51,15 @@ export default function ZieleScreen() {
     <ScrollView contentContainerStyle={styles.content}>
       {sorted.map((goal) => {
         const p = goalProgress(s, goal.id, now)!;
+        const forecast = goalForecast(s, goal.id, now);
+        const lowered = p.weeklyRateCents < p.initialWeeklyRateCents;
         const weekDone = p.thisWeekCents >= p.weeklyRateCents;
         return (
           <Card key={goal.id} style={[p.primary && { borderColor: colors.sand }, p.reached && { opacity: 0.85 }]}>
             <View style={styles.between}>
               <Text style={styles.h1}>{goal.name}</Text>
               {p.reached ? (
-                <Text style={[styles.badge, { color: colors.good }]}>Erreicht</Text>
+                <Text style={[styles.badge, { color: colors.good }]}>{goal.early ? 'Erreicht · Frühstarter' : 'Erreicht'}</Text>
               ) : (
                 p.primary && <Text style={styles.badge}>Hauptziel</Text>
               )}
@@ -68,8 +71,17 @@ export default function ZieleScreen() {
             {!p.reached && (
               <>
                 <Label>
-                  Bis {formatGermanDate(goal.dueDate)} · Wochenrate {formatEuro(p.weeklyRateCents)}
+                  Bis {formatGermanDate(goal.dueDate)} ·{' '}
+                  {lowered
+                    ? `Nur noch ${formatEuro(p.weeklyRateCents)} pro Woche (statt ${formatEuro(p.initialWeeklyRateCents)})`
+                    : `Wochenrate ${formatEuro(p.weeklyRateCents)}`}
                 </Label>
+                {forecast && (
+                  <Label>
+                    In deinem Tempo: {formatGermanDate(forecast.date)}
+                    {forecastText(forecast.daysEarly)}
+                  </Label>
+                )}
                 <Label>
                   Diese Woche {formatEuro(p.thisWeekCents)}
                   {weekDone ? ' – geschafft' : ` – noch ${formatEuro(p.weeklyRateCents - p.thisWeekCents)} bis zur Truhe`}
@@ -110,6 +122,13 @@ export default function ZieleScreen() {
       </Card>
     </ScrollView>
   );
+}
+
+function forecastText(daysEarly: number): string {
+  const weeks = Math.round(Math.abs(daysEarly) / 7);
+  if (weeks === 0) return ' – genau im Plan';
+  const span = weeks >= 8 ? `${Math.round(weeks / 4.3)} Monate` : `${weeks} Woche${weeks === 1 ? '' : 'n'}`;
+  return daysEarly > 0 ? ` – ${span} früher` : ` – ${span} später`;
 }
 
 function Action({ label, onPress, danger }: { label: string; onPress: () => void; danger?: boolean }) {

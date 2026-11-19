@@ -6,7 +6,8 @@ export const WEEKLY_SHELLS = 50;
 export const GOAL_SHELLS = 500;
 export const DAILY_REWARD_LIMIT = 5;
 
-export type MomentKind = 'verzicht' | 'einzahlung';
+/** verzicht = nicht gekauft (gemerkt), einzahlung = zur Seite gelegt, extra = Sonderzahlung wie Weihnachtsgeld */
+export type MomentKind = 'verzicht' | 'einzahlung' | 'extra';
 export type MomentStatus = 'gemerkt' | 'gesichert';
 
 export interface SparMoment {
@@ -31,6 +32,8 @@ export interface Goal {
   dueDate: string;
   createdAt: string;
   reachedAt?: string;
+  /** Abzeichen: mindestens 2 Wochen vor dem Termin erreicht */
+  early?: boolean;
 }
 
 export type RewardType = 'moment' | 'gesichert' | 'wochenrate' | 'ziel' | 'duplikat';
@@ -235,6 +238,8 @@ export interface Gain {
   rewards: Reward[];
   newAnimals: Animal[];
   newChests: Chest[];
+  /** Ziele, die gerade das Frühstarter-Abzeichen bekommen haben */
+  newBadges: Goal[];
   levelUp: Level | null;
   /** Nur beim Öffnen einer Truhe */
   opened?: Chest;
@@ -262,6 +267,7 @@ function finish(before: SparState, after: SparState, opened?: Chest): Result {
       rewards,
       newAnimals,
       newChests: after.chests.filter((c) => !chestIds.has(c.id)),
+      newBadges: after.goals.filter((g) => g.early && !before.goals.find((b) => b.id === g.id)?.early),
       levelUp: lvAfter.index > lvBefore.index ? lvAfter : null,
       opened,
     },
@@ -288,13 +294,13 @@ export function addMoment(state: SparState, input: MomentInput, now: Date, id: s
     (m) => m.rewarded && dayKey(new Date(m.createdAt)) === today,
   ).length;
   const rewarded = rewardedToday < DAILY_REWARD_LIMIT;
-  const secured = input.kind === 'einzahlung';
+  const secured = input.kind !== 'verzicht';
   const goalId = secured ? resolveGoal(state, input.goalId) : undefined;
 
   const moment: SparMoment = {
     id,
     kind: input.kind,
-    label: input.label.trim() || (secured ? 'Zur Seite gelegt' : 'Verzicht'),
+    label: input.label.trim() || DEFAULT_LABEL[input.kind],
     amountCents: input.amountCents,
     status: secured ? 'gesichert' : 'gemerkt',
     createdAt: at,
@@ -311,6 +317,60 @@ export function addMoment(state: SparState, input: MomentInput, now: Date, id: s
 
   let next: SparState = { ...state, moments: [moment, ...state.moments], rewards };
   if (goalId) next = applyBonuses(next, goalId, now);
+  return finish(state, next);
+}
+
+const DEFAULT_LABEL: Record<MomentKind, string> = {
+  verzicht: 'Verzicht',
+  einzahlung: 'Zur Seite gelegt',
+  extra: 'Extra-Geld',
+};
+
+export interface ExtraInput {
+  label: string;
+  /** Aufteilung auf Ziele; `goalId: null` = Hauptziel */
+  parts: { goalId: string | null; amountCents: number }[];
+}
+
+/**
+ * Extra-Geld (Weihnachtsgeld, Zulage …) – gilt sofort als gesichert und kann auf
+ * mehrere Ziele verteilt werden. Muscheln gibt es einmal (+10 +25), egal wie viel.
+ */
+export function addExtra(state: SparState, input: ExtraInput, now: Date, idBase: string): Result {
+  const parts = input.parts.filter((p) => p.amountCents > 0);
+  if (parts.length === 0 || parts.some((p) => !Number.isInteger(p.amountCents))) {
+    throw new Error('Betrag muss größer als 0 sein');
+  }
+  const at = now.toISOString();
+  const today = dayKey(now);
+  const rewardedToday = state.moments.filter(
+    (m) => m.rewarded && dayKey(new Date(m.createdAt)) === today,
+  ).length;
+  const label = input.label.trim() || DEFAULT_LABEL.extra;
+
+  const moments: SparMoment[] = parts.map((p, i) => ({
+    id: `${idBase}-${i}`,
+    kind: 'extra',
+    label,
+    amountCents: p.amountCents,
+    status: 'gesichert',
+    createdAt: at,
+    securedAt: at,
+    goalId: resolveGoal(state, p.goalId),
+    rewarded: i === 0 && rewardedToday < DAILY_REWARD_LIMIT,
+  }));
+
+  const rewards = [...state.rewards];
+  const first = moments[0];
+  if (first.rewarded) {
+    rewards.push({ id: `${first.id}:moment`, type: 'moment', shells: MOMENT_SHELLS, at, ref: first.id });
+    rewards.push({ id: `${first.id}:gesichert`, type: 'gesichert', shells: SECURED_SHELLS, at, ref: first.id });
+  }
+
+  let next: SparState = { ...state, moments: [...moments, ...state.moments], rewards };
+  for (const goalId of new Set(moments.map((m) => m.goalId))) {
+    if (goalId) next = applyBonuses(next, goalId, now);
+  }
   return finish(state, next);
 }
 
@@ -401,7 +461,8 @@ function applyBonuses(state: SparState, goalId: string, now: Date): SparState {
   const wk = weekKey(now);
   const weekRef = `${goalId}:${wk}`;
   const hasWeekly = rewards.some((r) => r.type === 'wochenrate' && r.ref === weekRef);
-  if (!hasWeekly && securedInWeek(state, goalId, now) >= weeklyRateCents(goal)) {
+  const rate = weeklyRateCents(state, goal, now);
+  if (!hasWeekly && rate > 0 && securedInWeek(state, goalId, now) >= rate) {
     rewards.push({ id: `wochenrate:${weekRef}`, type: 'wochenrate', shells: WEEKLY_SHELLS, at, ref: weekRef });
     chests.push({ id: `truhe:${weekRef}`, kind: 'klein', reason: `Wochenrate ${goal.name}`, at });
   }
@@ -410,7 +471,10 @@ function applyBonuses(state: SparState, goalId: string, now: Date): SparState {
   if (!hasGoal && securedForGoal(state, goalId) >= goal.targetCents) {
     rewards.push({ id: `ziel:${goalId}`, type: 'ziel', shells: GOAL_SHELLS, at, ref: goalId });
     chests.push({ id: `truhe:${goalId}:ziel`, kind: 'gross', reason: `Ziel erreicht: ${goal.name}`, at });
-    goals = goals.map((g) => (g.id === goalId ? { ...g, reachedAt: at } : g));
+    const early =
+      parseDayKey(goal.dueDate).getTime() - now.getTime() >= EARLY_MS &&
+      now.getTime() - new Date(goal.createdAt).getTime() >= EARLY_MS;
+    goals = goals.map((g) => (g.id === goalId ? { ...g, reachedAt: at, early } : g));
   }
   return { ...state, rewards, chests, goals };
 }
@@ -463,11 +527,58 @@ export function totalShells(state: SparState): number {
   return sum(state.rewards.map((r) => r.shells));
 }
 
-export function weeklyRateCents(goal: Goal): number {
+/** Frühstarter: mindestens 2 Wochen vor dem Termin – und das Ziel lief mindestens 2 Wochen */
+const EARLY_MS = 14 * 24 * 60 * 60 * 1000;
+
+/** Wochenrate beim Anlegen des Ziels */
+export function initialWeeklyRateCents(goal: Goal): number {
   const start = startOfDay(new Date(goal.createdAt)).getTime();
   const due = parseDayKey(goal.dueDate).getTime();
   const weeks = Math.max(1, Math.ceil((due - start) / (7 * DAY_MS)));
   return Math.ceil(goal.targetCents / weeks);
+}
+
+/**
+ * Aktuelle Wochenrate: was zu Wochenbeginn noch fehlte, verteilt auf die restlichen Wochen.
+ * Extra-Geld senkt sie also ab der nächsten Woche. Innerhalb einer Woche bleibt sie stabil.
+ */
+export function weeklyRateCents(state: SparState, goal: Goal, now: Date): number {
+  const weekStart = startOfWeek(now).getTime();
+  const from = Math.max(weekStart, startOfDay(new Date(goal.createdAt)).getTime());
+  const due = parseDayKey(goal.dueDate).getTime();
+  const weeks = Math.max(1, Math.ceil((due - from) / (7 * DAY_MS)));
+  const before = sum(
+    state.moments
+      .filter((m) => m.status === 'gesichert' && m.goalId === goal.id && m.securedAt && new Date(m.securedAt).getTime() < weekStart)
+      .map((m) => m.amountCents),
+  );
+  return Math.max(0, Math.ceil((goal.targetCents - before) / weeks));
+}
+
+export interface Forecast {
+  /** YYYY-MM-DD */
+  date: string;
+  /** positiv = früher als geplant */
+  daysEarly: number;
+}
+
+/**
+ * Wann ist das Ziel im bisherigen Tempo erreicht? Extra-Geld zählt zum Stand,
+ * aber nicht zum Tempo – sonst würde ein Weihnachtsgeld jede Woche eingerechnet.
+ */
+export function goalForecast(state: SparState, goalId: string, now: Date): Forecast | null {
+  const goal = state.goals.find((g) => g.id === goalId);
+  if (!goal || goal.reachedAt) return null;
+  const mine = state.moments.filter((m) => m.status === 'gesichert' && m.goalId === goalId);
+  const secured = sum(mine.map((m) => m.amountCents));
+  const regular = sum(mine.filter((m) => m.kind !== 'extra').map((m) => m.amountCents));
+  const days = Math.max(7, (now.getTime() - new Date(goal.createdAt).getTime()) / DAY_MS);
+  const perDay = regular / days;
+  const remaining = goal.targetCents - secured;
+  if (remaining <= 0 || perDay <= 0) return null;
+  const date = startOfDay(new Date(now.getTime() + Math.ceil(remaining / perDay) * DAY_MS));
+  const daysEarly = Math.round((parseDayKey(goal.dueDate).getTime() - date.getTime()) / DAY_MS);
+  return { date: dayKey(date), daysEarly };
 }
 
 export function securedForGoal(state: SparState, goalId: string): number {
@@ -493,6 +604,8 @@ export interface GoalProgress {
   securedCents: number;
   fraction: number;
   weeklyRateCents: number;
+  /** Rate beim Anlegen – zum Vergleich, wenn Extra-Geld sie gesenkt hat */
+  initialWeeklyRateCents: number;
   thisWeekCents: number;
   reached: boolean;
   primary: boolean;
@@ -506,7 +619,8 @@ export function goalProgress(state: SparState, goalId: string, now: Date): GoalP
     goal,
     securedCents,
     fraction: clamp(securedCents / goal.targetCents, 0, 1),
-    weeklyRateCents: weeklyRateCents(goal),
+    weeklyRateCents: weeklyRateCents(state, goal, now),
+    initialWeeklyRateCents: initialWeeklyRateCents(goal),
     thisWeekCents: securedInWeek(state, goalId, now),
     reached: Boolean(goal.reachedAt) || securedCents >= goal.targetCents,
     primary: state.primaryGoalId === goalId,
@@ -569,15 +683,18 @@ export function totals(state: SparState, now: Date): Totals {
   let openCents = 0;
   let securedCents = 0;
   let first = Infinity;
+  let extraCents = 0;
   for (const m of state.moments) {
     const t = new Date(m.createdAt).getTime();
     first = Math.min(first, t);
+    if (m.kind === 'extra') extraCents += m.amountCents;
     if (t >= weekFrom) weekCents += m.amountCents;
     if (t >= monthFrom) monthCents += m.amountCents;
     if (m.status === 'gemerkt') openCents += m.amountCents;
     else securedCents += m.amountCents;
   }
-  const all = openCents + securedCents;
+  // Hochrechnung ohne Extra-Geld: das kommt nicht jede Woche
+  const all = openCents + securedCents - extraCents;
   const days = first === Infinity ? 0 : Math.max(7, (now.getTime() - first) / DAY_MS);
   const yearProjectionCents = days === 0 ? 0 : Math.round((all / days) * 365);
   return { weekCents, monthCents, openCents, securedCents, yearProjectionCents };

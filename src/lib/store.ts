@@ -2,6 +2,7 @@ import Storage from './platform/storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import {
+  addExtra,
   addGoal,
   addMoment,
   deleteGoal,
@@ -12,6 +13,7 @@ import {
   secureMoments,
   setPrimaryGoal,
   updateGoal,
+  type ExtraInput,
   type Gain,
   type GoalInput,
   type MomentInput,
@@ -24,6 +26,7 @@ interface Actions {
   lastGain: Gain | null;
   clearGain: () => void;
   addMoment: (input: MomentInput) => Gain;
+  addExtra: (input: ExtraInput) => Gain;
   secure: (ids: string[], goalId?: string | null) => Gain;
   deleteMoment: (id: string) => void;
   addGoal: (input: GoalInput) => string;
@@ -60,6 +63,11 @@ export const useSpar = create<Store>()(
       clearGain: () => set({ lastGain: null }),
       addMoment: (input) => {
         const { state, gain } = addMoment(pick(get()), input, new Date(), newId());
+        set({ ...state, lastGain: gain });
+        return gain;
+      },
+      addExtra: (input) => {
+        const { state, gain } = addExtra(pick(get()), input, new Date(), newId());
         set({ ...state, lastGain: gain });
         return gain;
       },
