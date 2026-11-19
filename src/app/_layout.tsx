@@ -11,6 +11,7 @@ const isHydrated = () => useSpar.persist.hasHydrated();
 export default function RootLayout() {
   // Erst rendern, wenn die gespeicherten Daten geladen sind.
   const ready = useSyncExternalStore(subscribeHydration, isHydrated);
+  const tutorialSeen = useSpar((s) => s.settings.tutorialSeen);
   if (!ready) return null;
 
   return (
@@ -23,8 +24,12 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.bg },
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="moment" options={{ presentation: 'modal', title: 'Spar-Moment' }} />
+        {/* Beim ersten Start geht's erst durchs Tutorial. */}
+        <Stack.Protected guard={tutorialSeen} redirectTo="/tutorial">
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="moment" options={{ presentation: 'modal', title: 'Spar-Moment' }} />
+        </Stack.Protected>
+        <Stack.Screen name="tutorial" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       </Stack>
     </>
   );

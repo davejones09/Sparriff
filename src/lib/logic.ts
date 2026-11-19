@@ -47,6 +47,8 @@ export interface Settings {
   paydayDay: number;
   reminderHour: number;
   remindersEnabled: boolean;
+  /** Tutorial schon gesehen? Beim ersten Start false. */
+  tutorialSeen: boolean;
 }
 
 export interface SparState {
@@ -60,7 +62,7 @@ export const initialState: SparState = {
   goal: null,
   moments: [],
   rewards: [],
-  settings: { paydayDay: 1, reminderHour: 9, remindersEnabled: false },
+  settings: { paydayDay: 1, reminderHour: 9, remindersEnabled: false, tutorialSeen: false },
 };
 
 // ---------- Level & Tiere ----------

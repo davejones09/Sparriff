@@ -63,6 +63,11 @@ export const useSpar = create<Store>()(
       version: 1,
       storage: createJSONStorage(() => Storage),
       partialize: (s) => pick(s),
+      // Neue Einstellungen (z. B. tutorialSeen) bekommen bei alten Daten ihren Standardwert.
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<SparState>;
+        return { ...current, ...saved, settings: { ...current.settings, ...saved.settings } };
+      },
     },
   ),
 );
