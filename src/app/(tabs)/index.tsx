@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MessageBottle } from '@/components/MessageBottle';
 import { ReefSound } from '@/components/ReefSound';
 import { RewardToast } from '@/components/RewardToast';
 import { RiffScene } from '@/components/RiffScene';
@@ -47,6 +48,7 @@ export default function RiffScreen() {
 
         <View>
           <RiffScene levelIndex={level.index} animals={animals}>
+            <MessageBottle />
             <RewardToast />
           </RiffScene>
         </View>

@@ -32,6 +32,7 @@ Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite ne
 - **Sammlung** – 25 Tiere in 4 Seltenheiten, unentdeckte als Silhouette
 - **Übersicht** – Woche, Monat, offen, gesichert, Hochrechnung aufs Jahr, alle Spar-Momente
 - **Zahltag-Erinnerung** – monatliche Mitteilung an deinem Gehaltstag
+- **Flaschenpost** – treibt im Riff, jeden Tag ein Spartipp (150 Stück, passend zu Zahltag, Wochenende, Lieferdienst & Co.); gute Tipps aufheben und unter „Meine Flaschenpost“ auf Briefpapier nachlesen
 - **Sound** – Kasse beim Sichern, Wal-Ruf aus der Truhe, Unterwasser-Atmosphäre mit Walgesang (abschaltbar)
 - **Tutorial** – beim ersten Start, jederzeit wieder unter Einstellungen → „Tutorial ansehen“
 
@@ -66,6 +67,7 @@ Alle Bilder kommen aus GPT, freigestellt und zugeschnitten. Eingebunden werden s
 | `assets/riff/` | Riff Stufe 1–5 (Sandbank … Barriereriff), 941 × 1672 | in der App |
 | `assets/tiere/` | 25 Tiere als WebP (freigestellt, Blick nach rechts) | Riff, Truhen, Sammlung |
 | `assets/icons/` | Muschel, Schatztruhe zu/offen | in der App |
+| `assets/icons/flaschenpost.webp`, `papier.webp` | Flaschenpost im Riff, Briefpapier für Tipps | in der App |
 | `assets/icons/perle.png` | Perle (Streak-Schutz) | vorbereitet |
 | `assets/themes/` | Tiefsee, Nachtriff, Polarmeer | vorbereitet für weitere Reviere |
 | `assets/icon.png`, `android-icon-*` | App-Icon (Kaurimuschel) | in der App |
@@ -99,3 +101,4 @@ npm run lint        # Lint
 - `src/lib/reminders.ts` – Zahltag-Erinnerung
 - `src/components/` – Riff-Szene, Schwimm-Animation (`AnimalActor`), Belohnungs-Hinweis, UI-Bausteine
 - `src/lib/images.ts` – alle Bilder an einer Stelle
+- `src/lib/tips.ts` – die 150 Spartipps; `src/lib/tipLogic.ts` – Tipp des Tages je nach Situation

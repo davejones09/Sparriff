@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card, Label, SpriteImage } from '@/components/ui';
-import { animalImages, type Sprite } from '@/lib/images';
+import { animalImages, bottleSprite, type Sprite } from '@/lib/images';
 import { ANIMALS, RARITY_LABEL, formatEuro, totals, unlockedAnimals, type Rarity, type SparMoment } from '@/lib/logic';
 import { confirm } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
@@ -76,6 +76,20 @@ export default function UebersichtScreen() {
           </Label>
         </View>
       </Card>
+
+      <Pressable onPress={() => router.push('/briefe')} accessibilityRole="button">
+        <Card style={styles.badgeCard}>
+          <SpriteImage sprite={bottleSprite} height={40} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={styles.text}>Meine Flaschenpost</Text>
+            <Label>
+              {s.savedTips.length === 0
+                ? 'Noch keine Tipps aufgehoben'
+                : `${s.savedTips.length} aufgehobene${s.savedTips.length === 1 ? 'r' : ''} Tipp${s.savedTips.length === 1 ? '' : 's'}`}
+            </Label>
+          </View>
+        </Card>
+      </Pressable>
 
       <Text style={styles.h2}>Spar-Momente</Text>
       {s.moments.length === 0 && <Label>Noch nichts eingetragen.</Label>}
