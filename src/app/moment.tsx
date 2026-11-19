@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { GoalPicker } from '@/components/GoalPicker';
 import { Button, Label } from '@/components/ui';
 import { DAILY_REWARD_LIMIT, dayKey, formatEuro, parseEuro, type MomentKind } from '@/lib/logic';
 import { success } from '@/lib/platform/dialog';
@@ -19,10 +20,13 @@ const TEMPLATES = [
 export default function MomentScreen() {
   const addMoment = useSpar((s) => s.addMoment);
   const moments = useSpar((s) => s.moments);
+  const goals = useSpar((s) => s.goals);
+  const primaryGoalId = useSpar((s) => s.primaryGoalId);
   const [kind, setKind] = useState<MomentKind>('verzicht');
   const [label, setLabel] = useState('');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [goalId, setGoalId] = useState<string | null>(primaryGoalId);
 
   const today = dayKey(new Date());
   const rewardedToday = moments.filter((m) => m.rewarded && dayKey(new Date(m.createdAt)) === today).length;
@@ -34,7 +38,7 @@ export default function MomentScreen() {
       setError('Bitte einen Betrag eingeben, z. B. 3,50');
       return;
     }
-    addMoment({ kind, label, amountCents: cents });
+    addMoment({ kind, label, amountCents: cents, goalId });
     success();
     router.back();
   };
@@ -91,6 +95,12 @@ export default function MomentScreen() {
           placeholder={kind === 'verzicht' ? 'z. B. Coffee to go' : 'z. B. Spardose, Tagesgeld, ETF'}
           placeholderTextColor={colors.textDim}
         />
+        {kind === 'einzahlung' && goals.length > 1 && (
+          <>
+            <Label>In welches Ziel?</Label>
+            <GoalPicker goals={goals} value={goalId} onChange={setGoalId} />
+          </>
+        )}
         {error && <Text style={styles.error}>{error}</Text>}
         {limitReached && (
           <Label>Heute gibt’s keine Muscheln mehr für neue Spar-Momente – gespart wird trotzdem.</Label>

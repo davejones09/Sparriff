@@ -1,10 +1,13 @@
+import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card, Label, SpriteImage } from '@/components/ui';
-import { animalImages, collectibleImages, type Sprite } from '@/lib/images';
-import { ANIMALS, COLLECTIBLES, formatEuro, totals, unlockedAnimals, type SparMoment } from '@/lib/logic';
+import { animalImages, type Sprite } from '@/lib/images';
+import { ANIMALS, RARITY_LABEL, formatEuro, totals, unlockedAnimals, type Rarity, type SparMoment } from '@/lib/logic';
 import { confirm } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
 import { colors, radius } from '@/lib/theme';
+
+const GROUPS: Rarity[] = ['start', 'haeufig', 'selten', 'sehr-selten'];
 
 export default function UebersichtScreen() {
   const s = useSpar();
@@ -25,30 +28,42 @@ export default function UebersichtScreen() {
         <Label>Wenn du in deinem bisherigen Tempo weitersparst.</Label>
       </Card>
 
-      <Text style={styles.h2}>Deine Riff-Bewohner</Text>
-      <View style={styles.grid}>
-        {ANIMALS.map((a) => (
-          <AnimalTile
-            key={a.id}
-            name={a.name}
-            hint={a.hint}
-            sprite={animalImages[a.id]}
-            locked={!unlocked.includes(a.id)}
-          />
-        ))}
+      <View style={styles.between}>
+        <Text style={styles.h2}>Deine Riff-Bewohner</Text>
+        <Label>
+          {unlocked.length} von {ANIMALS.length} entdeckt
+        </Label>
       </View>
-
-      <Text style={styles.h2}>Sammel-Tiere</Text>
-      <View style={styles.grid}>
-        {COLLECTIBLES.map((c) => (
-          <AnimalTile key={c.id} name={c.name} hint={c.hint} sprite={collectibleImages[c.id]} locked />
-        ))}
-      </View>
+      {GROUPS.map((rarity) => {
+        const group = ANIMALS.filter((a) => a.rarity === rarity);
+        const found = group.filter((a) => unlocked.includes(a.id)).length;
+        return (
+          <View key={rarity} style={{ gap: 8 }}>
+            <Label>
+              {RARITY_LABEL[rarity]} · {found}/{group.length}
+            </Label>
+            <View style={styles.grid}>
+              {group.map((a) => {
+                const has = unlocked.includes(a.id);
+                return (
+                  <AnimalTile
+                    key={a.id}
+                    name={has || a.hint ? a.name : '???'}
+                    hint={a.hint ?? (has ? 'Aus einer Truhe' : 'Steckt in einer Truhe')}
+                    sprite={animalImages[a.id]}
+                    locked={!has}
+                  />
+                );
+              })}
+            </View>
+          </View>
+        );
+      })}
 
       <Text style={styles.h2}>Spar-Momente</Text>
       {s.moments.length === 0 && <Label>Noch nichts eingetragen.</Label>}
       {s.moments.map((m) => (
-        <MomentRow key={m.id} m={m} onSecure={() => s.secure([m.id])} onDelete={() => s.deleteMoment(m.id)} />
+        <MomentRow key={m.id} m={m} onSecure={() => router.push({ pathname: '/sichern', params: { id: m.id } })} onDelete={() => s.deleteMoment(m.id)} />
       ))}
     </ScrollView>
   );
@@ -58,9 +73,11 @@ function AnimalTile({ name, hint, sprite, locked }: { name: string; hint: string
   return (
     <View style={styles.tile}>
       <View style={styles.tileImage}>
-        <SpriteImage sprite={sprite} height={Math.min(64, 120 / sprite.aspect)} locked={locked} />
+        <SpriteImage sprite={sprite} height={Math.min(52, 84 / sprite.aspect)} locked={locked} />
       </View>
-      <Text style={[styles.text, locked && { color: colors.textDim }]}>{name}</Text>
+      <Text style={[styles.tileName, locked && { color: colors.textDim }]} numberOfLines={2}>
+        {name}
+      </Text>
       <Label>{hint}</Label>
     </View>
   );
@@ -117,17 +134,18 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 4,
   },
+  tileName: { color: colors.text, fontSize: 13, fontWeight: '600' },
+  between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
   tile: {
-    flexBasis: '47%',
-    flexGrow: 1,
+    width: '31%',
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: radius,
-    padding: 12,
-    gap: 4,
+    padding: 8,
+    gap: 2,
   },
-  tileImage: { height: 72, alignItems: 'center', justifyContent: 'center' },
+  tileImage: { height: 60, alignItems: 'center', justifyContent: 'center' },
   statValue: { color: colors.text, fontSize: 19, fontWeight: '700' },
   big: { color: colors.sand, fontSize: 26, fontWeight: '700' },
   h2: { color: colors.text, fontSize: 17, fontWeight: '600', marginTop: 8 },

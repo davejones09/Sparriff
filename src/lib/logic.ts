@@ -17,28 +17,30 @@ export interface SparMoment {
   status: MomentStatus;
   createdAt: string;
   securedAt?: string;
+  /** In welches Ziel das Geld beim Sichern ging */
+  goalId?: string;
   /** Hat dieser Moment Muscheln gebracht (Tageslimit)? */
   rewarded: boolean;
 }
 
 export interface Goal {
+  id: string;
   name: string;
   targetCents: number;
   /** YYYY-MM-DD */
   dueDate: string;
-  /** Anteil des Gesparten, der in die Schatztruhe geht (0–50). */
-  treasurePercent: number;
   createdAt: string;
+  reachedAt?: string;
 }
 
-export type RewardType = 'moment' | 'gesichert' | 'wochenrate' | 'ziel';
+export type RewardType = 'moment' | 'gesichert' | 'wochenrate' | 'ziel' | 'duplikat';
 
 export interface Reward {
   id: string;
   type: RewardType;
   shells: number;
   at: string;
-  /** Moment-ID, Wochen-Schlüssel oder Ziel-Zeitstempel */
+  /** Moment-ID, `${zielId}:${woche}`, Ziel-ID oder Truhen-ID */
   ref: string;
 }
 
@@ -51,21 +53,140 @@ export interface Settings {
   tutorialSeen: boolean;
 }
 
+// ---------- Tiere ----------
+
+export type Rarity = 'start' | 'haeufig' | 'selten' | 'sehr-selten';
+
+export const RARITY_LABEL: Record<Rarity, string> = {
+  start: 'Start-Tier',
+  haeufig: 'Häufig',
+  selten: 'Selten',
+  'sehr-selten': 'Sehr selten',
+};
+
+export type AnimalId =
+  | 'clownfisch'
+  | 'seepferdchen'
+  | 'schildkroete'
+  | 'doktorfisch'
+  | 'kugelfisch'
+  | 'feuerfisch'
+  | 'kaiserfisch'
+  | 'papageifisch'
+  | 'riffbarsch-schwarm'
+  | 'seestern'
+  | 'qualle'
+  | 'einsiedlerkrebs'
+  | 'schwarzspitzen-riffhai'
+  | 'oktopus'
+  | 'muraene'
+  | 'adlerrochen'
+  | 'engelhai'
+  | 'hammerhai'
+  | 'mantarochen'
+  | 'orca'
+  | 'weisser-hai'
+  | 'grindwal'
+  | 'pottwal'
+  | 'walhai'
+  | 'delfin';
+
+export interface Animal {
+  id: AnimalId;
+  name: string;
+  rarity: Rarity;
+  /** Wie man es bekommt – nur bei Start-Tieren, sonst aus Truhen */
+  hint?: string;
+}
+
+export const ANIMALS: readonly Animal[] = [
+  { id: 'clownfisch', name: 'Clownfisch', rarity: 'start', hint: 'Dein erster Spar-Moment' },
+  { id: 'seepferdchen', name: 'Seepferdchen', rarity: 'start', hint: 'Dein erster gesicherter Spar-Moment' },
+  { id: 'schildkroete', name: 'Meeresschildkröte', rarity: 'start', hint: 'Dein erster gesicherter Hunderter' },
+  { id: 'doktorfisch', name: 'Paletten-Doktorfisch', rarity: 'haeufig' },
+  { id: 'kugelfisch', name: 'Kugelfisch', rarity: 'haeufig' },
+  { id: 'feuerfisch', name: 'Feuerfisch', rarity: 'haeufig' },
+  { id: 'kaiserfisch', name: 'Kaiserfisch', rarity: 'haeufig' },
+  { id: 'papageifisch', name: 'Papageifisch', rarity: 'haeufig' },
+  { id: 'riffbarsch-schwarm', name: 'Fahnenbarsch-Schwarm', rarity: 'haeufig' },
+  { id: 'seestern', name: 'Seestern', rarity: 'haeufig' },
+  { id: 'qualle', name: 'Qualle', rarity: 'haeufig' },
+  { id: 'einsiedlerkrebs', name: 'Einsiedlerkrebs', rarity: 'haeufig' },
+  { id: 'schwarzspitzen-riffhai', name: 'Schwarzspitzen-Riffhai', rarity: 'haeufig' },
+  { id: 'oktopus', name: 'Oktopus', rarity: 'selten' },
+  { id: 'muraene', name: 'Muräne', rarity: 'selten' },
+  { id: 'adlerrochen', name: 'Adlerrochen', rarity: 'selten' },
+  { id: 'engelhai', name: 'Engelhai', rarity: 'selten' },
+  { id: 'hammerhai', name: 'Hammerhai', rarity: 'selten' },
+  { id: 'mantarochen', name: 'Mantarochen', rarity: 'selten' },
+  { id: 'orca', name: 'Orca', rarity: 'sehr-selten' },
+  { id: 'weisser-hai', name: 'Weißer Hai', rarity: 'sehr-selten' },
+  { id: 'grindwal', name: 'Indischer Grindwal', rarity: 'sehr-selten' },
+  { id: 'pottwal', name: 'Pottwal', rarity: 'sehr-selten' },
+  { id: 'walhai', name: 'Walhai', rarity: 'sehr-selten' },
+  { id: 'delfin', name: 'Großer Tümmler', rarity: 'sehr-selten' },
+];
+
+export function animal(id: AnimalId): Animal {
+  return ANIMALS.find((a) => a.id === id)!;
+}
+
+// ---------- Truhen ----------
+
+export type ChestKind = 'klein' | 'gross';
+
+export interface Chest {
+  id: string;
+  kind: ChestKind;
+  /** Wofür: Wochenrate oder erreichtes Ziel */
+  reason: string;
+  at: string;
+  openedAt?: string;
+  animal?: AnimalId;
+  duplicate?: boolean;
+  shells?: number;
+}
+
+/** Wahrscheinlichkeiten je Truhe */
+export const CHEST_ODDS: Record<ChestKind, [Rarity, number][]> = {
+  klein: [
+    ['haeufig', 0.75],
+    ['selten', 0.22],
+    ['sehr-selten', 0.03],
+  ],
+  gross: [
+    ['selten', 0.6],
+    ['sehr-selten', 0.4],
+  ],
+};
+
+/** Muscheln, wenn ein Tier doppelt kommt */
+export const DUPLICATE_SHELLS: Record<Rarity, number> = { start: 30, haeufig: 30, selten: 80, 'sehr-selten': 200 };
+
+// ---------- Zustand ----------
+
 export interface SparState {
-  goal: Goal | null;
+  goals: Goal[];
+  primaryGoalId: string | null;
   moments: SparMoment[];
   rewards: Reward[];
+  chests: Chest[];
+  /** Tiere aus Truhen */
+  collection: AnimalId[];
   settings: Settings;
 }
 
 export const initialState: SparState = {
-  goal: null,
+  goals: [],
+  primaryGoalId: null,
   moments: [],
   rewards: [],
+  chests: [],
+  collection: [],
   settings: { paydayDay: 1, reminderHour: 9, remindersEnabled: false, tutorialSeen: false },
 };
 
-// ---------- Level & Tiere ----------
+// ---------- Level ----------
 
 export interface Level {
   index: number;
@@ -96,44 +217,14 @@ export function levelFor(shells: number): LevelInfo {
   return { level, next, progress: clamp(progress, 0, 1) };
 }
 
-export type AnimalId = 'clownfisch' | 'seepferdchen' | 'schildkroete';
-
-export interface Animal {
-  id: AnimalId;
-  name: string;
-  hint: string;
-}
-
-export const ANIMALS: readonly Animal[] = [
-  { id: 'clownfisch', name: 'Clownfisch', hint: 'Dein erster Spar-Moment' },
-  { id: 'seepferdchen', name: 'Seepferdchen', hint: 'Dein erster gesicherter Spar-Moment' },
-  { id: 'schildkroete', name: 'Meeresschildkröte', hint: 'Dein erster gesicherter Hunderter' },
-];
-
-/** Große Sammel-Tiere – kommen mit den Challenges (Phase 2), bis dahin gesperrt. */
-export type CollectibleId = 'hammerhai' | 'mantarochen' | 'orca' | 'weisser-hai' | 'grindwal' | 'pottwal';
-
-export interface Collectible {
-  id: CollectibleId;
-  name: string;
-  hint: string;
-}
-
-export const COLLECTIBLES: readonly Collectible[] = [
-  { id: 'hammerhai', name: 'Hammerhai', hint: 'Kommt mit den Challenges' },
-  { id: 'mantarochen', name: 'Mantarochen', hint: 'Kommt mit den Challenges' },
-  { id: 'orca', name: 'Orca', hint: 'Kommt mit den Challenges' },
-  { id: 'weisser-hai', name: 'Weißer Hai', hint: 'Kommt mit den Challenges' },
-  { id: 'grindwal', name: 'Indischer Grindwal', hint: 'Kommt mit den Challenges' },
-  { id: 'pottwal', name: 'Pottwal', hint: 'Krönt die 52-Wochen-Challenge' },
-];
-
+/** Alle Tiere im Riff, neueste zuletzt. */
 export function unlockedAnimals(state: SparState): AnimalId[] {
   const ids: AnimalId[] = [];
   if (state.moments.length > 0) ids.push('clownfisch');
   const secured = state.moments.filter((m) => m.status === 'gesichert');
   if (secured.length > 0) ids.push('seepferdchen');
   if (sum(secured.map((m) => m.amountCents)) >= 100_00) ids.push('schildkroete');
+  for (const id of state.collection) if (!ids.includes(id)) ids.push(id);
   return ids;
 }
 
@@ -143,7 +234,10 @@ export interface Gain {
   shells: number;
   rewards: Reward[];
   newAnimals: Animal[];
+  newChests: Chest[];
   levelUp: Level | null;
+  /** Nur beim Öffnen einer Truhe */
+  opened?: Chest;
 }
 
 export interface Result {
@@ -151,28 +245,37 @@ export interface Result {
   gain: Gain;
 }
 
-function finish(before: SparState, after: SparState): Result {
+function finish(before: SparState, after: SparState, opened?: Chest): Result {
   const beforeIds = new Set(before.rewards.map((r) => r.id));
   const rewards = after.rewards.filter((r) => !beforeIds.has(r.id));
-  const shells = sum(rewards.map((r) => r.shells));
+  const chestIds = new Set(before.chests.map((c) => c.id));
   const animalsBefore = new Set(unlockedAnimals(before));
-  const newAnimals = ANIMALS.filter(
-    (a) => unlockedAnimals(after).includes(a.id) && !animalsBefore.has(a.id),
-  );
+  const newAnimals = unlockedAnimals(after)
+    .filter((id) => !animalsBefore.has(id))
+    .map(animal);
   const lvBefore = levelFor(totalShells(before)).level;
   const lvAfter = levelFor(totalShells(after)).level;
   return {
     state: after,
-    gain: { shells, rewards, newAnimals, levelUp: lvAfter.index > lvBefore.index ? lvAfter : null },
+    gain: {
+      shells: sum(rewards.map((r) => r.shells)),
+      rewards,
+      newAnimals,
+      newChests: after.chests.filter((c) => !chestIds.has(c.id)),
+      levelUp: lvAfter.index > lvBefore.index ? lvAfter : null,
+      opened,
+    },
   };
 }
 
-// ---------- Aktionen ----------
+// ---------- Spar-Momente ----------
 
 export interface MomentInput {
   kind: MomentKind;
   label: string;
   amountCents: number;
+  /** Für „Zur Seite gelegt“: in welches Ziel; Standard ist das Hauptziel */
+  goalId?: string | null;
 }
 
 export function addMoment(state: SparState, input: MomentInput, now: Date, id: string): Result {
@@ -186,6 +289,7 @@ export function addMoment(state: SparState, input: MomentInput, now: Date, id: s
   ).length;
   const rewarded = rewardedToday < DAILY_REWARD_LIMIT;
   const secured = input.kind === 'einzahlung';
+  const goalId = secured ? resolveGoal(state, input.goalId) : undefined;
 
   const moment: SparMoment = {
     id,
@@ -195,24 +299,25 @@ export function addMoment(state: SparState, input: MomentInput, now: Date, id: s
     status: secured ? 'gesichert' : 'gemerkt',
     createdAt: at,
     securedAt: secured ? at : undefined,
+    goalId,
     rewarded,
   };
 
   const rewards = [...state.rewards];
   if (rewarded) {
     rewards.push({ id: `${id}:moment`, type: 'moment', shells: MOMENT_SHELLS, at, ref: id });
-    if (secured) {
-      rewards.push({ id: `${id}:gesichert`, type: 'gesichert', shells: SECURED_SHELLS, at, ref: id });
-    }
+    if (secured) rewards.push({ id: `${id}:gesichert`, type: 'gesichert', shells: SECURED_SHELLS, at, ref: id });
   }
 
   let next: SparState = { ...state, moments: [moment, ...state.moments], rewards };
-  if (secured) next = applyBonuses(next, now);
+  if (goalId) next = applyBonuses(next, goalId, now);
   return finish(state, next);
 }
 
-export function secureMoments(state: SparState, ids: string[], now: Date): Result {
+/** Sichert gemerkte Momente und ordnet sie einem Ziel zu (Standard: Hauptziel). */
+export function secureMoments(state: SparState, ids: string[], goalId: string | null | undefined, now: Date): Result {
   const at = now.toISOString();
+  const target = resolveGoal(state, goalId);
   const wanted = new Set(ids);
   const rewards = [...state.rewards];
   const moments = state.moments.map((m) => {
@@ -220,9 +325,10 @@ export function secureMoments(state: SparState, ids: string[], now: Date): Resul
     if (m.rewarded) {
       rewards.push({ id: `${m.id}:gesichert`, type: 'gesichert', shells: SECURED_SHELLS, at, ref: m.id });
     }
-    return { ...m, status: 'gesichert' as const, securedAt: at };
+    return { ...m, status: 'gesichert' as const, securedAt: at, goalId: target };
   });
-  const next = applyBonuses({ ...state, moments, rewards }, now);
+  let next: SparState = { ...state, moments, rewards };
+  if (target) next = applyBonuses(next, target, now);
   return finish(state, next);
 }
 
@@ -234,50 +340,121 @@ export function deleteMoment(state: SparState, id: string): SparState {
   };
 }
 
+function resolveGoal(state: SparState, goalId: string | null | undefined): string | undefined {
+  if (goalId && state.goals.some((g) => g.id === goalId)) return goalId;
+  return state.primaryGoalId ?? state.goals[0]?.id ?? undefined;
+}
+
+// ---------- Ziele ----------
+
 export interface GoalInput {
   name: string;
   targetCents: number;
   dueDate: string;
-  treasurePercent: number;
 }
 
-export function setGoal(state: SparState, input: GoalInput, now: Date): SparState {
-  // Ziel nur anpassen (Name/Betrag/Datum) behält den Startzeitpunkt bei.
-  const createdAt = state.goal?.createdAt ?? now.toISOString();
+export function addGoal(state: SparState, input: GoalInput, now: Date, id: string): SparState {
+  const goal: Goal = {
+    id,
+    name: input.name.trim() || 'Mein Sparziel',
+    targetCents: input.targetCents,
+    dueDate: input.dueDate,
+    createdAt: now.toISOString(),
+  };
+  return { ...state, goals: [...state.goals, goal], primaryGoalId: state.primaryGoalId ?? id };
+}
+
+export function updateGoal(state: SparState, id: string, input: GoalInput): SparState {
   return {
     ...state,
-    goal: {
-      name: input.name.trim() || 'Mein Sparziel',
-      targetCents: input.targetCents,
-      dueDate: input.dueDate,
-      treasurePercent: clamp(Math.round(input.treasurePercent), 0, 50),
-      createdAt,
-    },
+    goals: state.goals.map((g) =>
+      g.id === id
+        ? { ...g, name: input.name.trim() || g.name, targetCents: input.targetCents, dueDate: input.dueDate }
+        : g,
+    ),
   };
 }
 
-/** Beginnt ein neues Ziel – der Fortschritt startet bei 0. */
-export function startNewGoal(state: SparState, input: GoalInput, now: Date): SparState {
-  return setGoal({ ...state, goal: null }, input, now);
+/** Löscht ein Ziel. Gesichertes Geld bleibt gesichert, gehört dann aber zu keinem Ziel mehr. */
+export function deleteGoal(state: SparState, id: string): SparState {
+  const goals = state.goals.filter((g) => g.id !== id);
+  return {
+    ...state,
+    goals,
+    primaryGoalId: state.primaryGoalId === id ? (goals.find((g) => !g.reachedAt)?.id ?? goals[0]?.id ?? null) : state.primaryGoalId,
+    moments: state.moments.map((m) => (m.goalId === id ? { ...m, goalId: undefined } : m)),
+  };
 }
 
-function applyBonuses(state: SparState, now: Date): SparState {
-  const goal = state.goal;
+export function setPrimaryGoal(state: SparState, id: string): SparState {
+  return state.goals.some((g) => g.id === id) ? { ...state, primaryGoalId: id } : state;
+}
+
+function applyBonuses(state: SparState, goalId: string, now: Date): SparState {
+  const goal = state.goals.find((g) => g.id === goalId);
   if (!goal) return state;
   const at = now.toISOString();
   const rewards = [...state.rewards];
+  const chests = [...state.chests];
+  let goals = state.goals;
 
   const wk = weekKey(now);
-  const hasWeekly = rewards.some((r) => r.type === 'wochenrate' && r.ref === wk);
-  if (!hasWeekly && securedInWeek(state, now) >= weeklyRateCents(goal)) {
-    rewards.push({ id: `wochenrate:${wk}`, type: 'wochenrate', shells: WEEKLY_SHELLS, at, ref: wk });
+  const weekRef = `${goalId}:${wk}`;
+  const hasWeekly = rewards.some((r) => r.type === 'wochenrate' && r.ref === weekRef);
+  if (!hasWeekly && securedInWeek(state, goalId, now) >= weeklyRateCents(goal)) {
+    rewards.push({ id: `wochenrate:${weekRef}`, type: 'wochenrate', shells: WEEKLY_SHELLS, at, ref: weekRef });
+    chests.push({ id: `truhe:${weekRef}`, kind: 'klein', reason: `Wochenrate ${goal.name}`, at });
   }
 
-  const hasGoal = rewards.some((r) => r.type === 'ziel' && r.ref === goal.createdAt);
-  if (!hasGoal && securedForGoal(state) >= goal.targetCents) {
-    rewards.push({ id: `ziel:${goal.createdAt}`, type: 'ziel', shells: GOAL_SHELLS, at, ref: goal.createdAt });
+  const hasGoal = rewards.some((r) => r.type === 'ziel' && r.ref === goalId);
+  if (!hasGoal && securedForGoal(state, goalId) >= goal.targetCents) {
+    rewards.push({ id: `ziel:${goalId}`, type: 'ziel', shells: GOAL_SHELLS, at, ref: goalId });
+    chests.push({ id: `truhe:${goalId}:ziel`, kind: 'gross', reason: `Ziel erreicht: ${goal.name}`, at });
+    goals = goals.map((g) => (g.id === goalId ? { ...g, reachedAt: at } : g));
   }
-  return { ...state, rewards };
+  return { ...state, rewards, chests, goals };
+}
+
+// ---------- Truhe öffnen ----------
+
+/** Öffnet eine Truhe. `random` liefert Zahlen in [0, 1) – austauschbar für Tests. */
+export function openChest(state: SparState, chestId: string, now: Date, random: () => number = Math.random): Result {
+  const chest = state.chests.find((c) => c.id === chestId);
+  if (!chest || chest.openedAt) return finish(state, state);
+
+  const roll = random();
+  let acc = 0;
+  let rarity: Rarity = CHEST_ODDS[chest.kind][0][0];
+  for (const [r, p] of CHEST_ODDS[chest.kind]) {
+    acc += p;
+    if (roll < acc) {
+      rarity = r;
+      break;
+    }
+  }
+  const pool = ANIMALS.filter((a) => a.rarity === rarity);
+  const owned = new Set(state.collection);
+  const fresh = pool.filter((a) => !owned.has(a.id));
+  const from = fresh.length > 0 ? fresh : pool;
+  const picked = from[Math.min(from.length - 1, Math.floor(random() * from.length))];
+  const duplicate = fresh.length === 0;
+  const shells = duplicate ? DUPLICATE_SHELLS[rarity] : 0;
+  const at = now.toISOString();
+
+  const opened: Chest = { ...chest, openedAt: at, animal: picked.id, duplicate, shells };
+  const next: SparState = {
+    ...state,
+    chests: state.chests.map((c) => (c.id === chestId ? opened : c)),
+    collection: duplicate ? state.collection : [...state.collection, picked.id],
+    rewards: duplicate
+      ? [...state.rewards, { id: `duplikat:${chestId}`, type: 'duplikat', shells, at, ref: chestId }]
+      : state.rewards,
+  };
+  return finish(state, next, opened);
+}
+
+export function closedChests(state: SparState): Chest[] {
+  return state.chests.filter((c) => !c.openedAt);
 }
 
 // ---------- Auswertungen ----------
@@ -293,23 +470,17 @@ export function weeklyRateCents(goal: Goal): number {
   return Math.ceil(goal.targetCents / weeks);
 }
 
-export function securedForGoal(state: SparState): number {
-  if (!state.goal) return 0;
-  const since = new Date(state.goal.createdAt).getTime();
-  return sum(
-    state.moments
-      .filter((m) => m.status === 'gesichert' && m.securedAt && new Date(m.securedAt).getTime() >= since)
-      .map((m) => m.amountCents),
-  );
+export function securedForGoal(state: SparState, goalId: string): number {
+  return sum(state.moments.filter((m) => m.status === 'gesichert' && m.goalId === goalId).map((m) => m.amountCents));
 }
 
-export function securedInWeek(state: SparState, now: Date): number {
+export function securedInWeek(state: SparState, goalId: string, now: Date): number {
   const from = startOfWeek(now).getTime();
   const to = from + 7 * DAY_MS;
   return sum(
     state.moments
       .filter((m) => {
-        if (m.status !== 'gesichert' || !m.securedAt) return false;
+        if (m.status !== 'gesichert' || !m.securedAt || m.goalId !== goalId) return false;
         const t = new Date(m.securedAt).getTime();
         return t >= from && t < to;
       })
@@ -318,25 +489,66 @@ export function securedInWeek(state: SparState, now: Date): number {
 }
 
 export interface GoalProgress {
+  goal: Goal;
   securedCents: number;
   fraction: number;
   weeklyRateCents: number;
   thisWeekCents: number;
-  treasureCents: number;
   reached: boolean;
+  primary: boolean;
 }
 
-export function goalProgress(state: SparState, now: Date): GoalProgress | null {
-  const goal = state.goal;
+export function goalProgress(state: SparState, goalId: string, now: Date): GoalProgress | null {
+  const goal = state.goals.find((g) => g.id === goalId);
   if (!goal) return null;
-  const securedCents = securedForGoal(state);
+  const securedCents = securedForGoal(state, goalId);
   return {
+    goal,
     securedCents,
     fraction: clamp(securedCents / goal.targetCents, 0, 1),
     weeklyRateCents: weeklyRateCents(goal),
-    thisWeekCents: securedInWeek(state, now),
-    treasureCents: Math.round((securedCents * goal.treasurePercent) / 100),
-    reached: securedCents >= goal.targetCents,
+    thisWeekCents: securedInWeek(state, goalId, now),
+    reached: Boolean(goal.reachedAt) || securedCents >= goal.targetCents,
+    primary: state.primaryGoalId === goalId,
+  };
+}
+
+export function primaryGoal(state: SparState): Goal | null {
+  return state.goals.find((g) => g.id === state.primaryGoalId) ?? null;
+}
+
+// ---------- Alte Daten (Version 1) übernehmen ----------
+
+interface StateV1 {
+  goal?: { name: string; targetCents: number; dueDate: string; createdAt: string } | null;
+  moments?: Omit<SparMoment, 'goalId'>[];
+  rewards?: Reward[];
+  settings?: Partial<Settings>;
+}
+
+export function migrateFromV1(old: StateV1): SparState {
+  const goalId = 'ziel-1';
+  const g = old.goal ?? null;
+  const since = g ? new Date(g.createdAt).getTime() : Infinity;
+  const rewards = (old.rewards ?? []).map((r) => {
+    if (!g) return r;
+    if (r.type === 'ziel') return { ...r, id: `ziel:${goalId}`, ref: goalId };
+    if (r.type === 'wochenrate') return { ...r, id: `wochenrate:${goalId}:${r.ref}`, ref: `${goalId}:${r.ref}` };
+    return r;
+  });
+  const reached = rewards.find((r) => r.type === 'ziel');
+  return {
+    ...initialState,
+    goals: g
+      ? [{ id: goalId, name: g.name, targetCents: g.targetCents, dueDate: g.dueDate, createdAt: g.createdAt, reachedAt: reached?.at }]
+      : [],
+    primaryGoalId: g ? goalId : null,
+    moments: (old.moments ?? []).map((m) => ({
+      ...m,
+      goalId: g && m.status === 'gesichert' && m.securedAt && new Date(m.securedAt).getTime() >= since ? goalId : undefined,
+    })),
+    rewards,
+    settings: { ...initialState.settings, ...old.settings },
   };
 }
 

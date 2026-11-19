@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, SpriteImage } from '@/components/ui';
-import { RIFF_ASPECT, animalImages, riffImages, shellImage, treasureImages, type Sprite } from '@/lib/images';
+import { RIFF_ASPECT, animalImages, riffImages, shellSprite, treasureImages, type Sprite } from '@/lib/images';
 import {
   DAILY_REWARD_LIMIT,
   GOAL_SHELLS,
@@ -33,7 +33,6 @@ interface Step {
   visual: Visual;
 }
 
-const shellSprite: Sprite = { source: shellImage, aspect: 512 / 428 };
 
 const STEPS: Step[] = [
   {
@@ -52,13 +51,13 @@ const STEPS: Step[] = [
     visual: animalImages.seepferdchen,
   },
   {
-    title: 'Muscheln, Level und Tiere',
-    text: `Mit Muscheln wächst dein Riff – von der Sandbank bis zum Barriereriff. Bei Meilensteinen ziehen neue Tiere ein. Pro Tag zählen bis zu ${DAILY_REWARD_LIMIT} Spar-Momente.`,
+    title: 'Muscheln und Level',
+    text: `Mit Muscheln wächst dein Riff – von der Sandbank bis zum Barriereriff. Pro Tag zählen bis zu ${DAILY_REWARD_LIMIT} Spar-Momente.`,
     visual: shellSprite,
   },
   {
-    title: 'Ziel und Schatztruhe',
-    text: `Leg ein Sparziel an. Schaffst du die Wochenrate, gibt's +${WEEKLY_SHELLS} Muscheln, beim Ziel +${GOAL_SHELLS}. Ein Teil des Gesparten landet in der Schatztruhe – zum Gönnen, ohne schlechtes Gewissen.`,
+    title: 'Ziele und Schatztruhen',
+    text: `Leg ein oder mehrere Sparziele an. Schaffst du die Wochenrate, gibt's +${WEEKLY_SHELLS} Muscheln und eine Truhe mit einem zufälligen Tier. Für ein erreichtes Ziel (+${GOAL_SHELLS}) sogar eine große Truhe mit einem seltenen.`,
     visual: treasureImages.open,
   },
 ];
@@ -72,7 +71,7 @@ export default function TutorialScreen() {
   const [pageHeight, setPageHeight] = useState(0);
   const [pending, setPending] = useState<Target | null>(null);
   const tutorialSeen = useSpar((s) => s.settings.tutorialSeen);
-  const hasGoal = useSpar((s) => s.goal !== null);
+  const hasGoal = useSpar((s) => s.goals.length > 0);
   const updateSettings = useSpar((s) => s.updateSettings);
   const last = index === STEPS.length - 1;
 
