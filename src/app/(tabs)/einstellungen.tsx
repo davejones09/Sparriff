@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button, Card, Label } from '@/components/ui';
 import {
@@ -81,6 +82,7 @@ export default function EinstellungenScreen() {
         <Label>Level: {LEVELS.map((l) => `${l.name} (${l.min})`).join(' · ')}</Label>
       </Card>
 
+      <Button title="Tutorial ansehen" variant="secondary" onPress={() => router.push('/tutorial')} />
       <Button title="Alle Daten löschen" variant="danger" onPress={confirmReset} />
     </ScrollView>
   );

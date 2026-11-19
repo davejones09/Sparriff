@@ -28,6 +28,7 @@ Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite ne
 - **Ziel** – Betrag, Datum, Wochenrate, Schatztruhe (Anteil zum Gönnen)
 - **Übersicht** – Woche, Monat, offen, gesichert, Hochrechnung aufs Jahr, alle Spar-Momente
 - **Zahltag-Erinnerung** – monatliche Mitteilung an deinem Gehaltstag
+- **Tutorial** – 5 Schritte beim ersten Start, jederzeit wieder unter Einstellungen → „Tutorial ansehen“
 
 ### Muscheln
 
