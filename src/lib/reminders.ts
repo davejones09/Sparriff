@@ -42,7 +42,7 @@ export async function scheduleZahltag(settings: Settings): Promise<boolean> {
 
   const content = {
     title: 'Zahltag im Riff',
-    body: 'Schieb deine gemerkten Beträge aufs Sparkonto – jeder gesicherte Spar-Moment bringt +25 Muscheln.',
+    body: 'Leg deine gemerkten Beträge zur Seite – jeder gesicherte Spar-Moment bringt +25 Muscheln.',
   };
 
   if (Platform.OS === 'android') {

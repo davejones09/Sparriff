@@ -44,12 +44,12 @@ export default function MomentScreen() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.segment}>
           <Segment active={kind === 'verzicht'} title="Nicht gekauft" onPress={() => setKind('verzicht')} />
-          <Segment active={kind === 'einzahlung'} title="Eingezahlt" onPress={() => setKind('einzahlung')} />
+          <Segment active={kind === 'einzahlung'} title="Zur Seite gelegt" onPress={() => setKind('einzahlung')} />
         </View>
         <Label>
           {kind === 'verzicht'
-            ? 'Wird als „gemerkt“ gespeichert. Sobald du das Geld aufs Sparkonto schiebst, sicherst du ihn für +25 Muscheln.'
-            : 'Das Geld liegt schon auf dem Sparkonto – zählt sofort als gesichert.'}
+            ? 'Wird als „gemerkt“ gespeichert. Sobald du das Geld wirklich zur Seite legst, sicherst du ihn für +25 Muscheln.'
+            : 'Das Geld ist schon zur Seite gelegt (Tagesgeld, Unterkonto, ETF, Spardose …) – zählt sofort als gesichert.'}
         </Label>
 
         {kind === 'verzicht' && (
@@ -88,7 +88,7 @@ export default function MomentScreen() {
           style={styles.input}
           value={label}
           onChangeText={setLabel}
-          placeholder={kind === 'verzicht' ? 'z. B. Coffee to go' : 'z. B. Sparrate November'}
+          placeholder={kind === 'verzicht' ? 'z. B. Coffee to go' : 'z. B. Spardose, Tagesgeld, ETF'}
           placeholderTextColor={colors.textDim}
         />
         {error && <Text style={styles.error}>{error}</Text>}

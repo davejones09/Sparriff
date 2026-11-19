@@ -30,8 +30,8 @@ export default function RiffScreen() {
   const secureAll = () =>
     confirm({
       title: 'Geld gesichert?',
-      message: `Hast du ${formatEuro(t.openCents)} aufs Sparkonto überwiesen?`,
-      confirmText: 'Ja, überwiesen',
+      message: `Hast du ${formatEuro(t.openCents)} wirklich zur Seite gelegt?`,
+      confirmText: 'Ja, erledigt',
       cancelText: 'Noch nicht',
       onConfirm: () => {
         s.secure(open.map((m) => m.id));
@@ -74,9 +74,9 @@ export default function RiffScreen() {
             <Text style={styles.h2}>{payday ? 'Heute ist Zahltag' : 'Offen zum Sichern'}</Text>
             <Text style={styles.text}>
               {formatEuro(t.openCents)} aus {open.length} Spar-Moment{open.length === 1 ? '' : 'en'} warten
-              auf dein Sparkonto. Jeder gesicherte bringt +25 Muscheln.
+              darauf, zur Seite gelegt zu werden. Jeder gesicherte bringt +25 Muscheln.
             </Text>
-            <Button title="Ich hab's überwiesen" variant="secondary" onPress={secureAll} />
+            <Button title="Ich hab's zur Seite gelegt" variant="secondary" onPress={secureAll} />
           </Card>
         )}
 
