@@ -28,6 +28,8 @@ export default function RootLayout() {
         <Stack.Protected guard={tutorialSeen} redirectTo="/tutorial">
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="moment" options={{ presentation: 'modal', title: 'Spar-Moment' }} />
+          <Stack.Screen name="sichern" options={{ presentation: 'modal', title: 'Sichern' }} />
+          <Stack.Screen name="truhe" options={{ presentation: 'modal', title: 'Schatztruhe' }} />
         </Stack.Protected>
         <Stack.Screen name="tutorial" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       </Stack>

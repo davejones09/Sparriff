@@ -31,7 +31,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="ziel"
-        options={{ title: 'Ziel', tabBarIcon: (p: IconProps) => <TabIcon name="flag" {...p} /> }}
+        options={{ title: 'Ziele', tabBarIcon: (p: IconProps) => <TabIcon name="flag" {...p} /> }}
       />
       <Tabs.Screen
         name="uebersicht"

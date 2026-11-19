@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RewardToast } from '@/components/RewardToast';
 import { RiffScene } from '@/components/RiffScene';
-import { Button, Card, Label, ProgressBar, ShellIcon } from '@/components/ui';
+import { Button, Card, Label, ProgressBar, ShellIcon, SpriteImage } from '@/components/ui';
+import { treasureImages } from '@/lib/images';
 import {
+  closedChests,
   formatEuro,
   goalProgress,
   isPayday,
@@ -13,7 +15,6 @@ import {
   totals,
   unlockedAnimals,
 } from '@/lib/logic';
-import { confirm, success } from '@/lib/platform/dialog';
 import { useSpar } from '@/lib/store';
 import { colors } from '@/lib/theme';
 
@@ -23,21 +24,11 @@ export default function RiffScreen() {
   const shells = totalShells(s);
   const { level, next, progress } = levelFor(shells);
   const t = totals(s, now);
-  const gp = goalProgress(s, now);
+  const gp = s.primaryGoalId ? goalProgress(s, s.primaryGoalId, now) : null;
+  const otherGoals = s.goals.length - (gp ? 1 : 0);
   const open = s.moments.filter((m) => m.status === 'gemerkt');
+  const chests = closedChests(s);
   const payday = isPayday(s.settings, now);
-
-  const secureAll = () =>
-    confirm({
-      title: 'Geld gesichert?',
-      message: `Hast du ${formatEuro(t.openCents)} wirklich zur Seite gelegt?`,
-      confirmText: 'Ja, erledigt',
-      cancelText: 'Noch nicht',
-      onConfirm: () => {
-        s.secure(open.map((m) => m.id));
-        success();
-      },
-    });
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
@@ -56,6 +47,20 @@ export default function RiffScreen() {
           </RiffScene>
         </View>
 
+        {chests.length > 0 && (
+          <Pressable onPress={() => router.push('/truhe')} accessibilityRole="button">
+            <Card style={styles.chestCard}>
+              <SpriteImage sprite={treasureImages.closed} height={56} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={styles.h2}>
+                  {chests.length === 1 ? 'Eine Truhe wartet auf dich' : `${chests.length} Truhen warten auf dich`}
+                </Text>
+                <Label>Tippen zum Öffnen – darin steckt ein Tier fürs Riff.</Label>
+              </View>
+            </Card>
+          </Pressable>
+        )}
+
         <Card>
           <View style={styles.between}>
             <Text style={styles.h2}>{level.name}</Text>
@@ -63,9 +68,7 @@ export default function RiffScreen() {
           </View>
           <ProgressBar value={progress} color={colors.teal} />
           <Label>
-            {next
-              ? `Noch ${next.min - shells} Muscheln bis ${next.name}`
-              : 'Dein Riff ist voll ausgebaut.'}
+            {next ? `Noch ${next.min - shells} Muscheln bis ${next.name}` : 'Dein Riff ist voll ausgebaut.'}
           </Label>
         </Card>
 
@@ -76,25 +79,30 @@ export default function RiffScreen() {
               {formatEuro(t.openCents)} aus {open.length} Spar-Moment{open.length === 1 ? '' : 'en'} warten
               darauf, zur Seite gelegt zu werden. Jeder gesicherte bringt +25 Muscheln.
             </Text>
-            <Button title="Ich hab's zur Seite gelegt" variant="secondary" onPress={secureAll} />
+            <Button title="Ich hab's zur Seite gelegt" variant="secondary" onPress={() => router.push('/sichern')} />
           </Card>
         )}
 
-        {s.goal && gp ? (
-          <Card>
-            <View style={styles.between}>
-              <Text style={styles.h2}>{s.goal.name}</Text>
-              <Label>{Math.round(gp.fraction * 100)} %</Label>
-            </View>
-            <ProgressBar value={gp.fraction} />
-            <Label>
-              {formatEuro(gp.securedCents)} von {formatEuro(s.goal.targetCents)} gesichert
-            </Label>
-          </Card>
+        {gp ? (
+          <Pressable onPress={() => router.navigate('/ziel')}>
+            <Card>
+              <View style={styles.between}>
+                <Text style={styles.h2}>{gp.goal.name}</Text>
+                <Label>{gp.reached ? 'Erreicht' : `${Math.round(gp.fraction * 100)} %`}</Label>
+              </View>
+              <ProgressBar value={gp.fraction} />
+              <Label>
+                {formatEuro(gp.securedCents)} von {formatEuro(gp.goal.targetCents)} gesichert
+                {otherGoals > 0 ? ` · +${otherGoals} weitere${otherGoals === 1 ? 's' : ''} Ziel${otherGoals === 1 ? '' : 'e'}` : ''}
+              </Label>
+            </Card>
+          </Pressable>
         ) : (
           <Card>
             <Text style={styles.h2}>Leg dein Sparziel an</Text>
-            <Text style={styles.text}>Mit Ziel gibt es Bonus-Muscheln für jede geschaffte Wochenrate.</Text>
+            <Text style={styles.text}>
+              Für jede geschaffte Wochenrate gibt’s eine Truhe mit einem zufälligen Tier.
+            </Text>
             <Button title="Ziel anlegen" variant="secondary" onPress={() => router.navigate('/ziel')} />
           </Card>
         )}
@@ -123,4 +131,5 @@ const styles = StyleSheet.create({
   between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   h2: { color: colors.text, fontSize: 17, fontWeight: '600' },
   text: { color: colors.text, fontSize: 15, lineHeight: 21 },
+  chestCard: { flexDirection: 'row', alignItems: 'center', gap: 14, borderColor: colors.sand },
 });

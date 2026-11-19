@@ -76,8 +76,9 @@ export default function EinstellungenScreen() {
         <Text style={styles.h2}>So gibt’s Muscheln</Text>
         <Rule text="Spar-Moment eintragen" shells={MOMENT_SHELLS} />
         <Rule text="Spar-Moment gesichert" shells={SECURED_SHELLS} />
-        <Rule text="Wochenrate geschafft" shells={WEEKLY_SHELLS} />
-        <Rule text="Sparziel erreicht" shells={GOAL_SHELLS} />
+        <Rule text="Wochenrate geschafft + kleine Truhe" shells={WEEKLY_SHELLS} />
+        <Rule text="Sparziel erreicht + große Truhe" shells={GOAL_SHELLS} />
+        <Rule text="Doppeltes Tier aus der Truhe" shells={30} suffix="–200" />
         <Label>Pro Tag zählen höchstens {DAILY_REWARD_LIMIT} Spar-Momente.</Label>
         <Label>Level: {LEVELS.map((l) => `${l.name} (${l.min})`).join(' · ')}</Label>
       </Card>
@@ -96,11 +97,14 @@ function Stepper({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
-function Rule({ text, shells }: { text: string; shells: number }) {
+function Rule({ text, shells, suffix = '' }: { text: string; shells: number; suffix?: string }) {
   return (
     <View style={styles.between}>
       <Text style={styles.text}>{text}</Text>
-      <Text style={styles.shells}>+{shells}</Text>
+      <Text style={styles.shells}>
+        +{shells}
+        {suffix}
+      </Text>
     </View>
   );
 }

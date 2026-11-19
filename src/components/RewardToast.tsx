@@ -28,7 +28,9 @@ export function RewardToast() {
   if (gain.levelUp) lines.push(`Neues Level: ${gain.levelUp.name}`);
   for (const a of gain.newAnimals) lines.push(`Neu im Riff: ${a.name}`);
   if (gain.rewards.some((r) => r.type === 'wochenrate')) lines.push('Wochenrate geschafft');
-  if (gain.rewards.some((r) => r.type === 'ziel')) lines.push('Ziel erreicht – die Schatztruhe ist offen');
+  if (gain.rewards.some((r) => r.type === 'ziel')) lines.push('Ziel erreicht!');
+  const chests = gain.newChests.length;
+  if (chests > 0) lines.push(chests === 1 ? 'Neue Truhe – tippe unten zum Öffnen' : `${chests} neue Truhen – tippe unten zum Öffnen`);
   if (gain.shells === 0 && lines.length === 0) lines.push('Gespeichert – für heute gibt’s keine Muscheln mehr');
 
   return (

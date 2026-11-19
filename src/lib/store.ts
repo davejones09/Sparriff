@@ -2,12 +2,16 @@ import Storage from './platform/storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import {
+  addGoal,
   addMoment,
+  deleteGoal,
   deleteMoment,
   initialState,
+  migrateFromV1,
+  openChest,
   secureMoments,
-  setGoal,
-  startNewGoal,
+  setPrimaryGoal,
+  updateGoal,
   type Gain,
   type GoalInput,
   type MomentInput,
@@ -20,10 +24,14 @@ interface Actions {
   lastGain: Gain | null;
   clearGain: () => void;
   addMoment: (input: MomentInput) => Gain;
-  secure: (ids: string[]) => Gain;
+  secure: (ids: string[], goalId?: string | null) => Gain;
   deleteMoment: (id: string) => void;
-  saveGoal: (input: GoalInput) => void;
-  newGoal: (input: GoalInput) => void;
+  addGoal: (input: GoalInput) => string;
+  updateGoal: (id: string, input: GoalInput) => void;
+  deleteGoal: (id: string) => void;
+  setPrimaryGoal: (id: string) => void;
+  /** Öffnet eine Truhe – das Ergebnis zeigt der Truhen-Screen selbst an. */
+  openChest: (id: string) => Gain;
   updateSettings: (patch: Partial<Settings>) => void;
   resetAll: () => void;
 }
@@ -33,7 +41,15 @@ export type Store = SparState & Actions;
 const newId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 function pick(s: Store): SparState {
-  return { goal: s.goal, moments: s.moments, rewards: s.rewards, settings: s.settings };
+  return {
+    goals: s.goals,
+    primaryGoalId: s.primaryGoalId,
+    moments: s.moments,
+    rewards: s.rewards,
+    chests: s.chests,
+    collection: s.collection,
+    settings: s.settings,
+  };
 }
 
 export const useSpar = create<Store>()(
@@ -47,23 +63,37 @@ export const useSpar = create<Store>()(
         set({ ...state, lastGain: gain });
         return gain;
       },
-      secure: (ids) => {
-        const { state, gain } = secureMoments(pick(get()), ids, new Date());
+      secure: (ids, goalId) => {
+        const { state, gain } = secureMoments(pick(get()), ids, goalId, new Date());
         set({ ...state, lastGain: gain });
         return gain;
       },
       deleteMoment: (id) => set(deleteMoment(pick(get()), id)),
-      saveGoal: (input) => set(setGoal(pick(get()), input, new Date())),
-      newGoal: (input) => set(startNewGoal(pick(get()), input, new Date())),
+      addGoal: (input) => {
+        const id = newId();
+        set(addGoal(pick(get()), input, new Date(), id));
+        return id;
+      },
+      updateGoal: (id, input) => set(updateGoal(pick(get()), id, input)),
+      deleteGoal: (id) => set(deleteGoal(pick(get()), id)),
+      setPrimaryGoal: (id) => set(setPrimaryGoal(pick(get()), id)),
+      openChest: (id) => {
+        const { state, gain } = openChest(pick(get()), id, new Date());
+        set(state);
+        return gain;
+      },
       updateSettings: (patch) => set({ settings: { ...get().settings, ...patch } }),
       resetAll: () => set({ ...initialState, lastGain: null }),
     }),
     {
       name: 'sparriff',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => Storage),
       partialize: (s) => pick(s),
-      // Neue Einstellungen (z. B. tutorialSeen) bekommen bei alten Daten ihren Standardwert.
+      // Version 1 hatte genau ein Ziel und keine Truhen.
+      migrate: (persisted, version) =>
+        (version < 2 ? migrateFromV1((persisted ?? {}) as Parameters<typeof migrateFromV1>[0]) : persisted) as SparState,
+      // Neue Felder bekommen bei älteren Daten ihren Standardwert.
       merge: (persisted, current) => {
         const saved = (persisted ?? {}) as Partial<SparState>;
         return { ...current, ...saved, settings: { ...current.settings, ...saved.settings } };
