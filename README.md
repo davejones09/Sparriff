@@ -32,6 +32,7 @@ Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite ne
 - **Sammlung** – 25 Tiere in 4 Seltenheiten, unentdeckte als Silhouette
 - **Übersicht** – Woche, Monat, offen, gesichert, Hochrechnung aufs Jahr, alle Spar-Momente
 - **Zahltag-Erinnerung** – monatliche Mitteilung an deinem Gehaltstag
+- **Sound** – Kasse beim Sichern, Wal-Ruf aus der Truhe, Unterwasser-Atmosphäre mit Walgesang (abschaltbar)
 - **Tutorial** – beim ersten Start, jederzeit wieder unter Einstellungen → „Tutorial ansehen“
 
 ### Muscheln
@@ -70,6 +71,19 @@ Alle Bilder kommen aus GPT, freigestellt und zugeschnitten. Eingebunden werden s
 | `assets/icon.png`, `android-icon-*` | App-Icon (Kaurimuschel) | in der App |
 
 Neue Tiere: freigestellt, Blick nach rechts, als WebP in `assets/tiere/` legen, in `src/lib/logic.ts` (Name, Seltenheit) und `src/lib/images.ts` (Größe, Bewegung, ggf. Schwanzflosse) eintragen.
+
+## Sound
+
+| Datei | Wofür |
+| --- | --- |
+| `assets/sounds/kasse.mp3` | Geld gesichert („Zur Seite gelegt“, Extra-Geld, Sichern) |
+| `assets/sounds/wal-ruf.mp3` | Wal aus einer Truhe (Orca, Grindwal, Pottwal) |
+| `assets/sounds/atmosphaere.mp3` | Unterwasser-Atmosphäre im Riff, 20 s nahtlose Schleife |
+| `assets/sounds/walgesang.mp3` | Alle 30–75 s im Riff, wenn ein Wal da ist |
+
+Einstellungen: „Effekte“ (Standard an) und „Atmosphäre“ (Standard aus). Die App respektiert den Stummschalter und unterbricht keine Musik anderer Apps. Noch offen: Truhe öffnen, Muscheln, Level-Up.
+
+Sounds von [Pixabay](https://pixabay.com) (Universfield, Dragon Studio), gekürzt und in der Lautstärke angeglichen.
 
 ## Entwicklung
 

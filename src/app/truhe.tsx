@@ -5,6 +5,7 @@ import { Button, Label, ShellIcon, SpriteImage } from '@/components/ui';
 import { animalImages, treasureImages } from '@/lib/images';
 import { RARITY_LABEL, animal, type Chest } from '@/lib/logic';
 import { success } from '@/lib/platform/dialog';
+import { playEffect } from '@/lib/sound';
 import { useSpar } from '@/lib/store';
 import { colors } from '@/lib/theme';
 import { useAnimatedNumber } from '@/lib/useAnimatedNumber';
@@ -39,6 +40,8 @@ export default function TruheScreen() {
       reveal.setValue(0);
       Animated.spring(reveal, { toValue: 1, friction: 5, tension: 60, useNativeDriver: true }).start();
       success();
+      const id = gain.opened?.animal;
+      if (id === 'orca' || id === 'grindwal' || id === 'pottwal') playEffect('walRuf');
       setBusy(false);
     });
   };

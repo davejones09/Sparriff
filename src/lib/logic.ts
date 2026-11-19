@@ -54,6 +54,10 @@ export interface Settings {
   remindersEnabled: boolean;
   /** Tutorial schon gesehen? Beim ersten Start false. */
   tutorialSeen: boolean;
+  /** Kurze Sounds (Kasse, Wal-Ruf …) */
+  soundEffects: boolean;
+  /** Unterwasser-Atmosphäre im Riff */
+  ambience: boolean;
 }
 
 // ---------- Tiere ----------
@@ -186,7 +190,14 @@ export const initialState: SparState = {
   rewards: [],
   chests: [],
   collection: [],
-  settings: { paydayDay: 1, reminderHour: 9, remindersEnabled: false, tutorialSeen: false },
+  settings: {
+    paydayDay: 1,
+    reminderHour: 9,
+    remindersEnabled: false,
+    tutorialSeen: false,
+    soundEffects: true,
+    ambience: false,
+  },
 };
 
 // ---------- Level ----------

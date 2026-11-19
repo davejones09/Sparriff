@@ -73,6 +73,27 @@ export default function EinstellungenScreen() {
       </Card>
 
       <Card>
+        <Text style={styles.h2}>Sound</Text>
+        <View style={styles.between}>
+          <Text style={styles.text}>Effekte (Kasse, Wal-Ruf)</Text>
+          <Switch
+            value={settings.soundEffects}
+            onValueChange={(v) => updateSettings({ soundEffects: v })}
+            trackColor={{ true: colors.teal, false: colors.surfaceStrong }}
+          />
+        </View>
+        <View style={styles.between}>
+          <Text style={styles.text}>Unterwasser-Atmosphäre im Riff</Text>
+          <Switch
+            value={settings.ambience}
+            onValueChange={(v) => updateSettings({ ambience: v })}
+            trackColor={{ true: colors.teal, false: colors.surfaceStrong }}
+          />
+        </View>
+        <Label>Mit Walgesang, wenn ein Wal in deinem Riff lebt. Bei Stummschaltung bleibt die App leise.</Label>
+      </Card>
+
+      <Card>
         <Text style={styles.h2}>So gibt’s Muscheln</Text>
         <Rule text="Spar-Moment eintragen" shells={MOMENT_SHELLS} />
         <Rule text="Spar-Moment gesichert" shells={SECURED_SHELLS} />

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ReefSound } from '@/components/ReefSound';
 import { RewardToast } from '@/components/RewardToast';
 import { RiffScene } from '@/components/RiffScene';
 import { Button, Card, Label, ProgressBar, ShellIcon, SpriteImage } from '@/components/ui';
@@ -29,9 +30,12 @@ export default function RiffScreen() {
   const open = s.moments.filter((m) => m.status === 'gemerkt');
   const chests = closedChests(s);
   const payday = isPayday(s.settings, now);
+  const animals = unlockedAnimals(s);
+  const whales = animals.some((a) => a === 'orca' || a === 'grindwal' || a === 'pottwal');
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
+      <ReefSound whales={whales} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Sparriff</Text>
@@ -42,7 +46,7 @@ export default function RiffScreen() {
         </View>
 
         <View>
-          <RiffScene levelIndex={level.index} animals={unlockedAnimals(s)}>
+          <RiffScene levelIndex={level.index} animals={animals}>
             <RewardToast />
           </RiffScene>
         </View>

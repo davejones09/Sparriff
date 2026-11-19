@@ -5,6 +5,7 @@ import { GoalPicker } from '@/components/GoalPicker';
 import { Button, Label } from '@/components/ui';
 import { DAILY_REWARD_LIMIT, dayKey, formatEuro, parseEuro, type MomentKind } from '@/lib/logic';
 import { success } from '@/lib/platform/dialog';
+import { playEffect } from '@/lib/sound';
 import { useSpar } from '@/lib/store';
 import { colors, radius } from '@/lib/theme';
 
@@ -79,6 +80,7 @@ export default function MomentScreen() {
       addMoment({ kind, label, amountCents: cents, goalId });
     }
     success();
+    if (kind !== 'verzicht') playEffect('kasse');
     router.back();
   };
 
