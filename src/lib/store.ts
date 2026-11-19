@@ -5,6 +5,7 @@ import {
   addExtra,
   addGoal,
   addMoment,
+  dayKey,
   deleteGoal,
   deleteMoment,
   initialState,
@@ -35,6 +36,10 @@ interface Actions {
   setPrimaryGoal: (id: string) => void;
   /** Öffnet eine Truhe – das Ergebnis zeigt der Truhen-Screen selbst an. */
   openChest: (id: string) => Gain;
+  /** Flaschenpost heute geöffnet */
+  markTipRead: () => void;
+  saveTip: (id: number) => void;
+  removeTip: (id: number) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   resetAll: () => void;
 }
@@ -51,6 +56,8 @@ function pick(s: Store): SparState {
     rewards: s.rewards,
     chests: s.chests,
     collection: s.collection,
+    savedTips: s.savedTips,
+    tipRead: s.tipRead,
     settings: s.settings,
   };
 }
@@ -90,6 +97,9 @@ export const useSpar = create<Store>()(
         set(state);
         return gain;
       },
+      markTipRead: () => set({ tipRead: dayKey(new Date()) }),
+      saveTip: (id) => set({ savedTips: [id, ...get().savedTips.filter((t) => t !== id)] }),
+      removeTip: (id) => set({ savedTips: get().savedTips.filter((t) => t !== id) }),
       updateSettings: (patch) => set({ settings: { ...get().settings, ...patch } }),
       resetAll: () => set({ ...initialState, lastGain: null }),
     }),

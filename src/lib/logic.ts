@@ -58,6 +58,8 @@ export interface Settings {
   soundEffects: boolean;
   /** Unterwasser-Atmosphäre im Riff */
   ambience: boolean;
+  /** Flaschenpost mit Spartipps im Riff */
+  tips: boolean;
 }
 
 // ---------- Tiere ----------
@@ -180,6 +182,10 @@ export interface SparState {
   chests: Chest[];
   /** Tiere aus Truhen */
   collection: AnimalId[];
+  /** Aufgehobene Spartipps (IDs, neueste zuerst) */
+  savedTips: number[];
+  /** Tag, an dem die Flaschenpost zuletzt geöffnet wurde (YYYY-MM-DD) */
+  tipRead: string | null;
   settings: Settings;
 }
 
@@ -190,6 +196,8 @@ export const initialState: SparState = {
   rewards: [],
   chests: [],
   collection: [],
+  savedTips: [],
+  tipRead: null,
   settings: {
     paydayDay: 1,
     reminderHour: 9,
@@ -197,6 +205,7 @@ export const initialState: SparState = {
     tutorialSeen: false,
     soundEffects: true,
     ambience: false,
+    tips: true,
   },
 };
 

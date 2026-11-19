@@ -94,6 +94,18 @@ export default function EinstellungenScreen() {
       </Card>
 
       <Card>
+        <View style={styles.between}>
+          <Text style={styles.text}>Flaschenpost mit Spartipps</Text>
+          <Switch
+            value={settings.tips}
+            onValueChange={(v) => updateSettings({ tips: v })}
+            trackColor={{ true: colors.teal, false: colors.surfaceStrong }}
+          />
+        </View>
+        <Label>Jeden Tag ein neuer Tipp im Riff – passend zu Zahltag, Wochenende & Co.</Label>
+      </Card>
+
+      <Card>
         <Text style={styles.h2}>So gibt’s Muscheln</Text>
         <Rule text="Spar-Moment eintragen" shells={MOMENT_SHELLS} />
         <Rule text="Spar-Moment gesichert" shells={SECURED_SHELLS} />

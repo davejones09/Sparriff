@@ -70,6 +70,10 @@ export const animalImages: Record<AnimalId, AnimalVisual> = {
 export const shellImage: ImageSourcePropType = require('../../assets/icons/muschel.png');
 export const shellSprite: Sprite = { source: shellImage, aspect: 512 / 428 };
 
+/** Flaschenpost im Riff und Briefpapier für Spartipps */
+export const bottleSprite: Sprite = { source: require('../../assets/icons/flaschenpost.webp'), aspect: 512 / 339 };
+export const paperImage: ImageSourcePropType = require('../../assets/icons/papier.webp');
+
 /** Schatztruhe zu / offen */
 export const treasureImages = {
   closed: { source: require('../../assets/icons/schatztruhe-zu.png'), aspect: 512 / 441 } as Sprite,

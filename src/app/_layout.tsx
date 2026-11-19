@@ -30,6 +30,8 @@ export default function RootLayout() {
           <Stack.Screen name="moment" options={{ presentation: 'modal', title: 'Spar-Moment' }} />
           <Stack.Screen name="sichern" options={{ presentation: 'modal', title: 'Sichern' }} />
           <Stack.Screen name="truhe" options={{ presentation: 'modal', title: 'Schatztruhe' }} />
+          <Stack.Screen name="tipp" options={{ presentation: 'modal', title: 'Flaschenpost' }} />
+          <Stack.Screen name="briefe" options={{ title: 'Meine Flaschenpost' }} />
         </Stack.Protected>
         <Stack.Screen name="tutorial" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       </Stack>
