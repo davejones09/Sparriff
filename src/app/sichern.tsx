@@ -5,6 +5,7 @@ import { GoalPicker } from '@/components/GoalPicker';
 import { Button, Card, Label } from '@/components/ui';
 import { formatEuro } from '@/lib/logic';
 import { success } from '@/lib/platform/dialog';
+import { playEffect } from '@/lib/sound';
 import { useSpar } from '@/lib/store';
 import { colors } from '@/lib/theme';
 
@@ -26,6 +27,7 @@ export default function SichernScreen() {
       goalId,
     );
     success();
+    playEffect('kasse');
     router.back();
   };
 
