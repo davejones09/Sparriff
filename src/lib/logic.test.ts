@@ -48,7 +48,7 @@ describe('Spar-Momente', () => {
     );
     expect(gain.shells).toBe(35);
     expect(state.moments[0].status).toBe('gesichert');
-    expect(state.moments[0].label).toBe('Einzahlung');
+    expect(state.moments[0].label).toBe('Zur Seite gelegt');
   });
 
   it('belohnt höchstens 5 Spar-Momente pro Tag', () => {

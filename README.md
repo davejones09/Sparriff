@@ -23,8 +23,8 @@ Bei jedem Push auf `main` baut die GitHub Action „Web-Vorschau“ die Seite ne
 ## Was in Version 1 drin ist
 
 - **Riff (Start)** – dein Riff in 5 Ausbaustufen, Muschel-Stand, Level-Fortschritt, Tiere, die einziehen
-- **Spar-Moment** – „Nicht gekauft“ (wird gemerkt) oder „Eingezahlt“ (sofort gesichert), mit Vorlagen
-- **Gemerkt vs. gesichert** – erst wenn du das Geld wirklich überweist, gibt’s die vollen Muscheln
+- **Spar-Moment** – „Nicht gekauft“ (wird gemerkt) oder „Zur Seite gelegt“ (sofort gesichert), mit Vorlagen
+- **Gemerkt vs. gesichert** – erst wenn du das Geld wirklich zur Seite legst (Tagesgeld, Unterkonto, ETF, Spardose …), gibt’s die vollen Muscheln
 - **Ziel** – Betrag, Datum, Wochenrate, Schatztruhe (Anteil zum Gönnen)
 - **Übersicht** – Woche, Monat, offen, gesichert, Hochrechnung aufs Jahr, alle Spar-Momente
 - **Zahltag-Erinnerung** – monatliche Mitteilung an deinem Gehaltstag

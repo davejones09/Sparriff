@@ -67,7 +67,7 @@ export default function EinstellungenScreen() {
         </View>
         <Label>
           {remindersSupported
-            ? 'Am Zahltag erinnert dich die App, deine gemerkten Beträge aufs Sparkonto zu schieben.'
+            ? 'Am Zahltag erinnert dich die App, deine gemerkten Beträge zur Seite zu legen.'
             : 'Die Zahltag-Erinnerung gibt’s nur in der App, nicht im Browser. Der Zahltag-Hinweis im Riff funktioniert trotzdem.'}
         </Label>
       </Card>

@@ -43,12 +43,12 @@ const STEPS: Step[] = [
   },
   {
     title: 'Spar-Moment eintragen',
-    text: `Coffee to go gespart? Tipp auf „Spar-Moment eintragen“ und wähl „Nicht gekauft“. Direkt aufs Sparkonto eingezahlt? Dann „Eingezahlt“. Jeder Spar-Moment bringt +${MOMENT_SHELLS} Muscheln.`,
+    text: `Coffee to go gespart? Tipp auf „Spar-Moment eintragen“ und wähl „Nicht gekauft“. Geld direkt zur Seite gelegt? Dann „Zur Seite gelegt“. Jeder Spar-Moment bringt +${MOMENT_SHELLS} Muscheln.`,
     visual: animalImages.clownfisch,
   },
   {
     title: 'Erst gemerkt, dann gesichert',
-    text: `Ein Verzicht ist erst gemerkt. Schiebst du das Geld wirklich aufs Sparkonto, tippst du „Ich hab's überwiesen“ – dann ist er gesichert und bringt +${SECURED_SHELLS} Muscheln.`,
+    text: `Ein Verzicht ist erst gemerkt. Legst du das Geld wirklich zur Seite – Tagesgeld, Unterkonto, ETF oder Spardose –, tippst du „Ich hab's zur Seite gelegt“. Dann ist er gesichert und bringt +${SECURED_SHELLS} Muscheln.`,
     visual: animalImages.seepferdchen,
   },
   {

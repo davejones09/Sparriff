@@ -190,7 +190,7 @@ export function addMoment(state: SparState, input: MomentInput, now: Date, id: s
   const moment: SparMoment = {
     id,
     kind: input.kind,
-    label: input.label.trim() || (secured ? 'Einzahlung' : 'Verzicht'),
+    label: input.label.trim() || (secured ? 'Zur Seite gelegt' : 'Verzicht'),
     amountCents: input.amountCents,
     status: secured ? 'gesichert' : 'gemerkt',
     createdAt: at,
