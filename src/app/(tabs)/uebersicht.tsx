@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card, Label, SpriteImage } from '@/components/ui';
@@ -13,6 +14,7 @@ export default function UebersichtScreen() {
   const s = useSpar();
   const t = totals(s, new Date());
   const unlocked = unlockedAnimals(s);
+  const early = s.goals.filter((g) => g.early);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -59,6 +61,21 @@ export default function UebersichtScreen() {
           </View>
         );
       })}
+
+      <Text style={styles.h2}>Abzeichen</Text>
+      <Card style={[styles.badgeCard, early.length === 0 && { opacity: 0.6 }]}>
+        <Ionicons name="ribbon" size={34} color={early.length > 0 ? colors.sand : colors.textDim} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={styles.text}>
+            Frühstarter{early.length > 1 ? ` ×${early.length}` : ''}
+          </Text>
+          <Label>
+            {early.length > 0
+              ? early.map((g) => g.name).join(', ')
+              : 'Ein Ziel mindestens 2 Wochen vor dem Termin erreichen.'}
+          </Label>
+        </View>
+      </Card>
 
       <Text style={styles.h2}>Spar-Momente</Text>
       {s.moments.length === 0 && <Label>Noch nichts eingetragen.</Label>}
@@ -135,6 +152,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tileName: { color: colors.text, fontSize: 13, fontWeight: '600' },
+  badgeCard: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
   tile: {
     width: '31%',

@@ -29,6 +29,7 @@ export function RewardToast() {
   for (const a of gain.newAnimals) lines.push(`Neu im Riff: ${a.name}`);
   if (gain.rewards.some((r) => r.type === 'wochenrate')) lines.push('Wochenrate geschafft');
   if (gain.rewards.some((r) => r.type === 'ziel')) lines.push('Ziel erreicht!');
+  for (const g of gain.newBadges) lines.push(`Abzeichen: Frühstarter (${g.name})`);
   const chests = gain.newChests.length;
   if (chests > 0) lines.push(chests === 1 ? 'Neue Truhe – tippe unten zum Öffnen' : `${chests} neue Truhen – tippe unten zum Öffnen`);
   if (gain.shells === 0 && lines.length === 0) lines.push('Gespeichert – für heute gibt’s keine Muscheln mehr');
